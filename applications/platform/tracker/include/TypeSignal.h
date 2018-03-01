@@ -14,7 +14,7 @@ public:
 	{
 	public:
 		// Header
-		uint32_t samplingFrequency = 0;
+		uint64_t m_samplingFrequency = 0;
 	};
 
 	class Buffer : public TypeMatrix::Buffer

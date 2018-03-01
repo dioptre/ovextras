@@ -30,7 +30,7 @@ public:
 			TypeStimulation::Buffer* tmp = new TypeStimulation::Buffer();
 			for(size_t i=0;i<decoded->getStimulationCount();i++)
 			{
-				tmp->buffer.appendStimulation(decoded->getStimulationIdentifier(i),
+				tmp->m_buffer.appendStimulation(decoded->getStimulationIdentifier(i),
 					decoded->getStimulationDate(i),
 					decoded->getStimulationDuration(i)
 					);

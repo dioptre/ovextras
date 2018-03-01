@@ -32,7 +32,7 @@ public:
 
 //	bool getNextChunk(uint64_t idx, const StreamChunk** output);
 
-	uint32_t getSamplingRate(void);
+	uint64_t getSamplingRate(void) const;
 
 	Selection m_Selection;          // Which parts of the dataset have been selected
 

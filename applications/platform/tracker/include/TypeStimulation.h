@@ -19,7 +19,7 @@ public:
 	{
 	public:
 		// Payload
-		OpenViBE::CStimulationSet buffer;
+		OpenViBE::CStimulationSet m_buffer;
 
 	};
 

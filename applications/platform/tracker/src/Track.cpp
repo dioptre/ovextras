@@ -46,6 +46,7 @@ bool Track::initialize(const char *filename)
 		}
 		m_Decoders[buf.streamIndex]->decode(buf);
 	}
+	
 
 	return true;
 };
@@ -56,7 +57,7 @@ bool Track::uninitialize(void)
 //	return m_Dataset.uninitialize();
 }
 
-uint32_t Track::getSamplingRate(void) 
+uint64_t Track::getSamplingRate(void) const
 {
 	// @fixme picks rate of first signal stream
 	for(auto it = m_Streams.begin();it!=m_Streams.end();it++)
@@ -66,7 +67,7 @@ uint32_t Track::getSamplingRate(void)
 		{
 			Stream<TypeSignal>* tmp = reinterpret_cast< Stream<TypeSignal>* >(ptr);
 			const TypeSignal::Header& head = tmp->getHeader();
-			return head.samplingFrequency;
+			return head.m_samplingFrequency;
 		}
 	}
 	return 0;

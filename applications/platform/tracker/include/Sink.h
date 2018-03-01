@@ -44,6 +44,7 @@ public:
 
 	bool m_SignalHeaderSent = false;
 	bool m_StimulationHeaderSent = false;
+	bool m_PlayFast = false;
 
 private:
 

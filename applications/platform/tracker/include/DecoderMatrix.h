@@ -28,7 +28,7 @@ public:
 			OpenViBE::IMatrix* decoded = m_decoder.getOutputMatrix();
 
 			TypeMatrix::Buffer* tmp = new TypeMatrix::Buffer(); 
-			OpenViBEToolkit::Tools::Matrix::copy(tmp->buffer, *decoded);
+			OpenViBEToolkit::Tools::Matrix::copy(tmp->m_buffer, *decoded);
 			tmp->m_bufferStart = chunk.bufferStart;
 			tmp->m_bufferEnd = chunk.bufferEnd;
 

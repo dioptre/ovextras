@@ -40,6 +40,24 @@ TestClass::TestClass(OpenViBE::Kernel::IKernelContext& ctx) : m_ctx(ctx)
 	src.initialize(eegFile.toASCIIString());
 
 #if 0
+	// Test code illustrating how to alter stimulation stream
+	for(auto it = m_Streams.begin();it != m_Streams.end(); it++)
+	{
+		if(it->second->getTypeIdentifier() == OV_TypeId_Stimulations)
+		{
+			TypeBase::Buffer *ptr = nullptr;
+			it->second->peek(OpenViBE::ITimeArithmetics::secondsToTime(5.0), &ptr);
+			TypeStimulation::Buffer *ptr2 = reinterpret_cast<TypeStimulation::Buffer*>(ptr);
+			// std::cout << "cnt: " << ptr2->m_buffer.getStimulationCount() << "\n";
+
+			// Request early stop
+			ptr2->m_buffer.clear();
+			ptr2->m_buffer.appendStimulation(OVTK_StimulationId_ExperimentStop, OpenViBE::ITimeArithmetics::secondsToTime(5.0),0);
+		}
+	}
+#endif
+
+#if 0
 	StreamHeaderSignal signalHeader;
 	signalHeader.m_samplingFrequency = 512;
 

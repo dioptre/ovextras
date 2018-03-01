@@ -212,7 +212,7 @@ public:
 			}
 
 			// Simulate a realtime sending device. @fixme spins thread and only needed for visus
-			while(1) {
+			while(!m_rSink.m_PlayFast) {
 				uint64_t elapsed = System::Time::zgetTime() - startTime;
 				if(elapsed >= m_BufferDuration*m_BuffersSent) {
 					break;
@@ -238,7 +238,7 @@ public:
 
 		// client should close the connection on exit
 
-		std::cout << "Flushing remaining " << m_vClientPendingBuffer.size() << " buffers";
+		std::cout << "Flushing remaining " << m_vClientPendingBuffer.size() << " buffers\n";
 
 		oLock.lock();
 		for(size_t i=0;i<m_vClientPendingBuffer.size();i++)
@@ -250,9 +250,10 @@ public:
 	}
 };
 
-void playerLaunch(const char *xmlFile)
+void playerLaunch(const char *xmlFile, bool playFast)
 {
-	std::string Designer = std::string(OpenViBE::Directories::getBinDir().toASCIIString()) + "/openvibe-designer --no-gui --play ";
+	std::string Designer = std::string(OpenViBE::Directories::getBinDir().toASCIIString()) + "/openvibe-designer --no-gui " 
+		+ (playFast ? "--play-fast " : "--play ");
 	std::string OutputDump = std::string(OpenViBE::Directories::getDistRootDir().toASCIIString()) + "/tracker-dump.txt";
 
 	auto cmd = Designer + std::string(xmlFile) + " >" + OutputDump;
@@ -272,6 +273,7 @@ bool Sink::initialize(const char *xmlFile, uint32_t samplingRate)
 	m_SamplingRate = samplingRate;
 	m_ChunkSize = 32;
 	m_ChunksSent = 0;
+	m_PlayFast = false;	// @todo To work neatly it'd be better to be able to pass in the chunk times to the designer side
 
 	m_ClientHandlerThread = nullptr;
 	m_pPlayerThread = nullptr;
@@ -295,7 +297,7 @@ bool Sink::initialize(const char *xmlFile, uint32_t samplingRate)
 
 	// Create a player object with the xml
 	m_ClientHandlerThread = new std::thread(std::bind(CClientHandler::start_thread, m_ClientHandler));
-	m_pPlayerThread = new std::thread(std::bind(&playerLaunch, xmlFile));
+	m_pPlayerThread = new std::thread(std::bind(&playerLaunch, xmlFile, m_PlayFast));
 
 	return true; 
 }
@@ -437,7 +439,7 @@ bool Sink::pull(StreamBase* stream)
 		{
 			m_OutputEncoder->ip_ui64SignalSamplingRate = m_SamplingRate;
 			m_OutputEncoder->ip_ui64BufferDuration = ITimeArithmetics::sampleCountToTime(m_SamplingRate, m_ChunkSize);
-			OpenViBEToolkit::Tools::Matrix::copyDescription(*m_OutputEncoder->ip_pSignalMatrix, sPtr->buffer);
+			OpenViBEToolkit::Tools::Matrix::copyDescription(*m_OutputEncoder->ip_pSignalMatrix, sPtr->m_buffer);
 
 			IStimulationSet* stimSet = m_OutputEncoder->ip_pStimulationSet;
 			stimSet->clear();
@@ -449,7 +451,7 @@ bool Sink::pull(StreamBase* stream)
 		}
 
 		IMatrix* target = m_OutputEncoder->ip_pSignalMatrix;
-		OpenViBEToolkit::Tools::Matrix::copy(*target, sPtr->buffer);
+		OpenViBEToolkit::Tools::Matrix::copy(*target, sPtr->m_buffer);
 
 
 
@@ -464,12 +466,12 @@ bool Sink::pull(StreamBase* stream)
 		const TypeStimulation::Buffer* sPtr = reinterpret_cast<const TypeStimulation::Buffer*>(ptr);
 
 		// This will be sent when the next signal chunk is sent
-		for(size_t i=0;i<sPtr->buffer.getStimulationCount();i++)
+		for(size_t i=0;i<sPtr->m_buffer.getStimulationCount();i++)
 		{
 			m_OutputEncoder->ip_pStimulationSet->appendStimulation(
-				sPtr->buffer.getStimulationIdentifier(i),
-				sPtr->buffer.getStimulationDate(i),
-				sPtr->buffer.getStimulationDuration(i)
+				sPtr->m_buffer.getStimulationIdentifier(i),
+				sPtr->m_buffer.getStimulationDate(i),
+				sPtr->m_buffer.getStimulationDuration(i)
 				);
 		}
 	}

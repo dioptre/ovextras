@@ -14,14 +14,14 @@ public:
 	{
 	public:
 		// Header
-		OpenViBE::CMatrix header;	
+		OpenViBE::CMatrix m_header;	
 	};
 
 	class Buffer : public TypeBase::Buffer
 	{
 	public:
 		// Payload
-		OpenViBE::CMatrix buffer;	
+		OpenViBE::CMatrix m_buffer;	
 
 	};
 
