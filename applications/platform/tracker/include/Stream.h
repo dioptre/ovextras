@@ -40,7 +40,7 @@ public:
 	virtual bool peek(uint64_t timePoint, TypeBase::Buffer** ptr) override { 
 		// @fixme inefficient; could improve with binary search if needed
 		auto it = std::find_if(m_Chunks.begin(), m_Chunks.end(), 
-			[timePoint](const T::Buffer* b) { return (timePoint >= b->m_bufferStart && timePoint < b->m_bufferEnd); });
+			[timePoint](const typename T::Buffer* b) { return (timePoint >= b->m_bufferStart && timePoint < b->m_bufferEnd); });
 		if(it!=m_Chunks.end())
 		{
 			*ptr = *it; return true;

@@ -6,6 +6,7 @@
 #include <condition_variable>
 #include <stack>
 #include <map>
+#include <vector>
 
 #include <openvibe/ov_all.h>
 #include <openvibe/ovCMatrix.h>

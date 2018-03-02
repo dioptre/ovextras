@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <deque>
+#include <vector>
 
 #include "../../../../plugins/processing/file-io/src/ovp_defines.h"
 

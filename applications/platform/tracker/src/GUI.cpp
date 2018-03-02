@@ -13,6 +13,8 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+#include <string.h> // strchr on Ubuntu
+
 #include "GUI.h"
 
 using namespace OpenViBE;
