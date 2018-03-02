@@ -8,7 +8,9 @@
 #include <toolkit/ovtk_all.h>
 #include <iostream>
 
-#include "Workspace.h"
+#include "Tracker.h"
+
+#include "GUI.h"
 
 #include "Testclass.h"
 
@@ -83,7 +85,7 @@ public:
 		l_rConfigurationManager.addConfigurationFromFile(l_rConfigurationManager.expand("${Path_Data}/applications/acquisition-server/acquisition-server-defaults.conf"));
 
 		// User configuration mods
-		l_rConfigurationManager.addConfigurationFromFile(l_rConfigurationManager.expand("${Path_UserData}/openvibe-acquisition-server.conf"));
+		l_rConfigurationManager.addConfigurationFromFile(l_rConfigurationManager.expand("${Path_UserData}/openvibe-tracker.conf"));
 
 		m_KernelContext->getPluginManager().addPluginsFromFiles(l_rConfigurationManager.expand("${AcquisitionServer_Plugins}"));
 
@@ -96,8 +98,6 @@ public:
 
 };
 
-
-
 int main(int argc, char *argv[])
 {
 	KernelWrapper kernelWrapper;
@@ -107,33 +107,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-// 	TestClass tmp(*kernelWrapper.m_KernelContext);
+	Tracker app(*kernelWrapper.m_KernelContext);
 
-	Workspace wp(*kernelWrapper.m_KernelContext);
+	GUI gui(argc, argv, app);
 
-	const CString eegFile = OpenViBE::Directories::getDataDir() + CString("/scenarios/signals/bci-motor-imagery.ov");
-//	const CString eegFile = CString("E:/jl/noise-test.ov");
-	const CString scenarioFile = OpenViBE::Directories::getDataDir() + CString("/applications/tracker/tracker-debug-display.xml");
-	
-	if(!wp.setTrack(eegFile.toASCIIString()))
-	{
-		return 2;
-	}
-	if(!wp.setSink(scenarioFile.toASCIIString()))
-	{
-		return 3;
-	}
-
-	// Push some chunks to selection
-	Selection& selection = wp.m_track.m_Selection;
-	selection.addRange(Range(3,5));
-	selection.addRange(Range(9,11));
-
-	if(!wp.play())
-	{
-		return 4;
-	}
-
-	return 0;
+	return gui.run();
 }
 

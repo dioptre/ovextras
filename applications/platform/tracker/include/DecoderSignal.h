@@ -25,8 +25,12 @@ public:
 
 		if(m_decoder.isHeaderReceived())
 		{
-			TypeSignal::Header header;
-			header.m_samplingFrequency =  m_decoder.getOutputSamplingRate();
+			TypeSignal::Header* header = new TypeSignal::Header();
+			header->m_samplingFrequency = m_decoder.getOutputSamplingRate();
+
+			OpenViBE::IMatrix* decoded = m_decoder.getOutputMatrix();
+			OpenViBEToolkit::Tools::Matrix::copy(header->m_header, *decoded);
+
 			m_Target->setHeader(header);
 		}
 

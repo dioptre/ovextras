@@ -30,7 +30,6 @@ bool Track::initialize(const char *filename)
 				Stream<TypeSignal>* tmp = new Stream<TypeSignal>();
 				m_Streams[buf.streamIndex] = tmp;
 				m_Decoders[buf.streamIndex] = new DecoderSignal(m_KernelContext, tmp);
-//				m_StreamPosition[buf.streamIndex] = 0;
 			}
 			else if (buf.streamType==OV_TypeId_Stimulations)
 			{
@@ -47,6 +46,7 @@ bool Track::initialize(const char *filename)
 		m_Decoders[buf.streamIndex]->decode(buf);
 	}
 	
+	std::cout << "Streams initialized ok\n";
 
 	return true;
 };
@@ -55,6 +55,15 @@ bool Track::uninitialize(void)
 {
 	return true;
 //	return m_Dataset.uninitialize();
+}
+
+bool Track::rewind(void)
+{
+	bool returnValue = true;
+
+	std::for_each(m_Streams.begin(), m_Streams.end(), [&returnValue](std::pair<uint64_t, StreamBase*> entry) { returnValue &= entry.second->rewind(); } );
+
+	return returnValue;
 }
 
 uint64_t Track::getSamplingRate(void) const

@@ -46,6 +46,11 @@ bool Source::uninitialize(void)
 
 bool Source::pullChunk(MemoryBufferWithType& output)
 {
+	if(!m_pFile)
+	{
+		std::cout << "Error: No source file set\n";
+		return false;
+	}
 //	std::cout << "Source: Trying to pull a chunk\n";
 
 	while(!feof(m_pFile))

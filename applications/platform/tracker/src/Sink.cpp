@@ -135,7 +135,6 @@ public:
 		,m_BuffersSent(0)
 		,m_con(nullptr)
 	{
-		m_BufferDuration = ITimeArithmetics::sampleCountToTime(m_rSink.m_SamplingRate, m_rSink.m_ChunkSize);
 	}
 
 	Sink& m_rSink;
@@ -143,7 +142,7 @@ public:
 	std::deque< OpenViBE::IMemoryBuffer* > m_vClientPendingBuffer;
 	std::mutex m_oClientThreadMutex;
 	std::condition_variable m_oPendingBufferCondition;
-	uint64_t m_BufferDuration;
+	std::condition_variable m_oPendingBufferConsumed;
 	uint64_t m_BuffersSent;
 	Socket::IConnection* m_con;
 
@@ -165,6 +164,18 @@ public:
 
 		// No big harm notifying in any case, though if in 'quit' state, the quit request has already notified
 		m_oPendingBufferCondition.notify_one();	
+
+		{
+			std::unique_lock<std::mutex> oLock(m_oClientThreadMutex);
+
+			// Wait until something interesting happens...
+			m_oPendingBufferConsumed.wait(oLock, 
+				[this]() { 
+					return (m_bPleaseQuit || m_vClientPendingBuffer.size()==0);
+				}
+			);
+		}
+
 	}
 
 	void operator()(void)
@@ -213,8 +224,10 @@ public:
 
 			// Simulate a realtime sending device. @fixme spins thread and only needed for visus
 			while(!m_rSink.m_PlayFast) {
+				const uint64_t bufferDuration = m_rSink.m_OutputEncoder->ip_ui64BufferDuration;
+
 				uint64_t elapsed = System::Time::zgetTime() - startTime;
-				if(elapsed >= m_BufferDuration*m_BuffersSent) {
+				if(elapsed >= bufferDuration*m_BuffersSent) {
 					break;
 				}
 			}
@@ -234,6 +247,8 @@ public:
 
 			// Don't go into blocking send while holding the lock; ok to unlock as l_pMemoryBuffer ptr+mem is now owned by this thread
 			oLock.unlock();
+
+			m_oPendingBufferConsumed.notify_one();
 		}
 
 		// client should close the connection on exit
@@ -252,7 +267,7 @@ public:
 
 void playerLaunch(const char *xmlFile, bool playFast)
 {
-	std::string Designer = std::string(OpenViBE::Directories::getBinDir().toASCIIString()) + "/openvibe-designer --no-gui " 
+	std::string Designer = std::string(OpenViBE::Directories::getBinDir().toASCIIString()) + "/openvibe-designer --no-session-management --no-gui " 
 		+ (playFast ? "--play-fast " : "--play ");
 	std::string OutputDump = std::string(OpenViBE::Directories::getDistRootDir().toASCIIString()) + "/tracker-dump.txt";
 
@@ -264,40 +279,43 @@ void playerLaunch(const char *xmlFile, bool playFast)
 	}
 }
 
-bool Sink::initialize(const char *xmlFile, uint32_t samplingRate) 
+bool Sink::configureSink(void)
+{
+	if(m_xmlFilename.length()==0) 
+	{
+		std::cout << "Error: Please set sink filename first\n";
+		return false;
+	}
+
+	std::string Designer = std::string(OpenViBE::Directories::getBinDir().toASCIIString()) + "/openvibe-designer --no-session-management --open ";
+	std::string OutputDump = std::string(OpenViBE::Directories::getDistRootDir().toASCIIString()) + "/tracker-sink-configure-dump.txt";
+
+	auto cmd = Designer + std::string(m_xmlFilename) + " >" + OutputDump;
+
+	if(system(cmd.c_str())!=0)
+	{
+		std::cout << "Launch of [" << cmd.c_str() << "] failed\n";
+		return false;
+	}
+	return true;
+}
+
+
+bool Sink::initialize(const char *xmlFile) 
 { 
+
+
 	std::cout << "Sink: Initializing with "	<< xmlFile << "\n";
 	
 	m_pConnectionServer = NULL;
-	const uint32_t ui32ConnectionPort = 1024;
-	m_SamplingRate = samplingRate;
-	m_ChunkSize = 32;
+	m_ConnectionPort = 1024;
 	m_ChunksSent = 0;
-	m_PlayFast = false;	// @todo To work neatly it'd be better to be able to pass in the chunk times to the designer side
+	m_xmlFilename = xmlFile;
 
 	m_ClientHandlerThread = nullptr;
 	m_pPlayerThread = nullptr;
 
-	// Create a socket reading thread here
-	m_pConnectionServer=Socket::createConnectionServer();
-	if(!m_pConnectionServer->listen(ui32ConnectionPort))
-	{
-		std::cout << "Error listening to port " << ui32ConnectionPort << "\n";
-		return false;
-	}
 
-	m_OutputEncoder = new OutputEncoder(m_KernelContext);
-	if(!m_OutputEncoder->initialize())
-	{
-		delete m_OutputEncoder;
-		return false;
-	}
-
-	m_ClientHandler = new CClientHandler(*this);
-
-	// Create a player object with the xml
-	m_ClientHandlerThread = new std::thread(std::bind(CClientHandler::start_thread, m_ClientHandler));
-	m_pPlayerThread = new std::thread(std::bind(&playerLaunch, xmlFile, m_PlayFast));
 
 	return true; 
 }
@@ -306,56 +324,7 @@ bool Sink::uninitialize(void)
 { 
 	std::cout << "Sink: Uninitializing\n";
 
-	// tear down the player object
-	if(m_pPlayerThread)
-	{
-		std::cout << "Joining player thread\n";
-		m_pPlayerThread->join();
-		delete m_pPlayerThread;
-		m_pPlayerThread = nullptr;
-	}
-
-	// tear down the server thread	
-	if(m_ClientHandlerThread)
-	{
-		std::cout << "Joining client handler thread\n";
-
-		// Use a scoped lock before toggling a variable owned by the thread
-		{
-			std::lock_guard<std::mutex> oLock(m_ClientHandler->m_oClientThreadMutex);
-				
-			// Tell the thread to quit
-			m_ClientHandler->m_bPleaseQuit = true;
-		}
-
-		// Wake up the thread in case it happens to be waiting on the cond var
-		m_ClientHandler->m_oPendingBufferCondition.notify_one();
-		
-		// @fixme potential ouch, but needed if thread is sitting in accept()
-		m_pConnectionServer->close();
-
-		m_ClientHandlerThread->join();
-		delete m_ClientHandlerThread;
-		m_ClientHandlerThread = nullptr;
-	}
-
-	if(m_ClientHandler)
-	{
-		delete m_ClientHandler;
-		m_ClientHandler = nullptr;
-	}
-
-	if(m_pConnectionServer)
-	{
-		m_pConnectionServer->release();
-		m_pConnectionServer = nullptr;
-	}
-
-	if(m_OutputEncoder)
-	{
-		delete m_OutputEncoder;
-		m_OutputEncoder = nullptr;
-	}
+	stop();
 
 	return true;
 }
@@ -413,33 +382,51 @@ bool Sink::pushChunk(const StreamChunk* chunk)
 
 bool Sink::pull(StreamBase* stream)
 {
+	if(!m_pPlayerThread)
+	{
+		std::cout << "Error: Playerthread has not been launched\n";
+		return false;
+	}
+		
 
-	const TypeBase::Buffer* ptr;
+	const TypeBase::Buffer* bufferPtr;
 
-	if(!stream->peek(&ptr))
+	if(!stream->peek(&bufferPtr))
 	{
 		return false;
 	}
 
 	// Flush previous buffers when the current buffer start is older than the previous ones
-	if(ptr->m_bufferStart>= m_PreviousChunkEnd && m_PreviousChunkEnd>0)
+	if(bufferPtr->m_bufferStart>= m_PreviousChunkEnd && m_PreviousChunkEnd>0)
 	{
 			m_ClientHandler->pushChunk(*m_OutputEncoder->encodeBuffer());
 
 			m_OutputEncoder->ip_pStimulationSet->clear();
 	}
-	m_PreviousChunkEnd = std::max(m_PreviousChunkEnd, ptr->m_bufferEnd );
+	m_PreviousChunkEnd = std::max(m_PreviousChunkEnd, bufferPtr->m_bufferEnd );
 
 	if(stream->getTypeIdentifier() == OV_TypeId_Signal)
 	{
-		// Stream<TypeSignal>* sPtr = reinterpret_cast< Stream<TypeSignal>* >(ptr);
-		const TypeSignal::Buffer* sPtr = reinterpret_cast<const TypeSignal::Buffer*>(ptr);
-
 		if(!m_SignalHeaderSent)
 		{
+			const TypeSignal::Header& head = (reinterpret_cast<const Stream<TypeSignal>* >(stream))->getHeader();
+
+			if(head.m_samplingFrequency==0)
+			{
+				std::cout << "Error: Samplingrate == 0\n";
+				return false;
+			}
+			if(head.m_header.getDimensionCount()!=2)
+			{
+				std::cout << "Error: Signal buffer dim count is not 2";
+			}
+
+			m_SamplingRate = head.m_samplingFrequency;
+			m_ChunkSize = head.m_header.getDimensionSize(0);
+
 			m_OutputEncoder->ip_ui64SignalSamplingRate = m_SamplingRate;
 			m_OutputEncoder->ip_ui64BufferDuration = ITimeArithmetics::sampleCountToTime(m_SamplingRate, m_ChunkSize);
-			OpenViBEToolkit::Tools::Matrix::copyDescription(*m_OutputEncoder->ip_pSignalMatrix, sPtr->m_buffer);
+			OpenViBEToolkit::Tools::Matrix::copyDescription(*m_OutputEncoder->ip_pSignalMatrix, head.m_header);
 
 			IStimulationSet* stimSet = m_OutputEncoder->ip_pStimulationSet;
 			stimSet->clear();
@@ -450,8 +437,9 @@ bool Sink::pull(StreamBase* stream)
 			m_SignalHeaderSent = true;
 		}
 
+		const TypeSignal::Buffer* signalBufferPtr = reinterpret_cast<const TypeSignal::Buffer*>(bufferPtr);
 		IMatrix* target = m_OutputEncoder->ip_pSignalMatrix;
-		OpenViBEToolkit::Tools::Matrix::copy(*target, sPtr->m_buffer);
+		OpenViBEToolkit::Tools::Matrix::copy(*target, signalBufferPtr->m_buffer);
 
 
 
@@ -463,7 +451,7 @@ bool Sink::pull(StreamBase* stream)
 	{
 			
 //			std::cout << "Stimchunk\n";
-		const TypeStimulation::Buffer* sPtr = reinterpret_cast<const TypeStimulation::Buffer*>(ptr);
+		const TypeStimulation::Buffer* sPtr = reinterpret_cast<const TypeStimulation::Buffer*>(bufferPtr);
 
 		// This will be sent when the next signal chunk is sent
 		for(size_t i=0;i<sPtr->m_buffer.getStimulationCount();i++)
@@ -485,6 +473,35 @@ bool Sink::pull(StreamBase* stream)
 	return true;
 }
 
+bool Sink::play(bool playFast)
+{
+	m_ChunksSent = 0;
+	m_PreviousChunkEnd = 0;
+	m_PlayFast = playFast;	// @todo To work neatly it'd be better to be able to pass in the chunk times to the designer side
+
+	// Create a socket reading thread here
+	m_pConnectionServer=Socket::createConnectionServer();
+	if(!m_pConnectionServer->listen(m_ConnectionPort))
+	{
+		std::cout << "Error listening to port " << m_ConnectionPort << "\n";
+		return false;
+	}
+
+	m_OutputEncoder = new OutputEncoder(m_KernelContext);
+	if(!m_OutputEncoder->initialize())
+	{
+		delete m_OutputEncoder;
+		return false;
+	}
+
+	m_ClientHandler = new CClientHandler(*this);
+
+	// Create a player object with the xml
+	m_ClientHandlerThread = new std::thread(std::bind(CClientHandler::start_thread, m_ClientHandler));
+	m_pPlayerThread = new std::thread(std::bind(&playerLaunch, m_xmlFilename.c_str(), m_PlayFast));
+
+	return true;
+}
 
 bool Sink::stop(void)
 {
@@ -502,5 +519,67 @@ bool Sink::stop(void)
 		m_SignalHeaderSent = false;
 	}
 
+	// tear down the player object
+	if(m_pPlayerThread)
+	{
+		std::cout << "Joining player thread\n";
+		m_pPlayerThread->join();
+		delete m_pPlayerThread;
+		m_pPlayerThread = nullptr;
+	}
+
+	// tear down the server thread	
+	if(m_ClientHandlerThread)
+	{
+		std::cout << "Joining client handler thread\n";
+
+		// Use a scoped lock before toggling a variable owned by the thread
+		{
+			std::lock_guard<std::mutex> oLock(m_ClientHandler->m_oClientThreadMutex);
+				
+			// Tell the thread to quit
+			m_ClientHandler->m_bPleaseQuit = true;
+		}
+
+		// Wake up the thread in case it happens to be waiting on the cond var
+		m_ClientHandler->m_oPendingBufferCondition.notify_one();
+		
+		// @fixme potential ouch, but needed if thread is sitting in accept()
+		m_pConnectionServer->close();
+
+		m_ClientHandlerThread->join();
+		delete m_ClientHandlerThread;
+		m_ClientHandlerThread = nullptr;
+	}
+
+	if(m_ClientHandler)
+	{
+		delete m_ClientHandler;
+		m_ClientHandler = nullptr;
+	}
+
+	if(m_pConnectionServer)
+	{
+		m_pConnectionServer->release();
+		m_pConnectionServer = nullptr;
+	}
+
+	if(m_OutputEncoder)
+	{
+		delete m_OutputEncoder;
+		m_OutputEncoder = nullptr;
+	}
+
 	return true;
 }
+
+
+uint64_t Sink::getCurrentTime(void) const
+{
+	if(m_SamplingRate==0)
+	{
+		return 0;
+	}
+	return ITimeArithmetics::sampleCountToTime(m_SamplingRate, m_ChunksSent*m_ChunkSize);
+}
+

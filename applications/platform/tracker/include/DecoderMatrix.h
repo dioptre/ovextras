@@ -23,6 +23,16 @@ public:
 		m_Box.dummy.m_InBuffer.append(chunk.buffer);
 		m_decoder.decode(0);
 
+		if(m_decoder.isHeaderReceived())
+		{
+			TypeMatrix::Header* header = new TypeMatrix::Header();
+			OpenViBE::IMatrix* decoded = m_decoder.getOutputMatrix();
+
+			OpenViBEToolkit::Tools::Matrix::copy(header->m_header, *decoded);
+
+			m_Target->setHeader(header);
+		}
+
 		if(m_decoder.isBufferReceived())
 		{
 			OpenViBE::IMatrix* decoded = m_decoder.getOutputMatrix();

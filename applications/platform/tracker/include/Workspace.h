@@ -9,27 +9,39 @@
 class Workspace {
 public:
 
-	Workspace(OpenViBE::Kernel::IKernelContext& rContext) : m_KernelContext(rContext), m_output(rContext), m_track(rContext) { };
+	Workspace(OpenViBE::Kernel::IKernelContext& rContext);
 	~Workspace(void);
 
 	// Set an EEG file to the workspace (@todo change to 'addTrack' for multiple files)
 	bool setTrack(const char *filename);
+	const char *getTrackFile(void) { return m_Trackfile.c_str();}
 
 	// Set output for chunks
 	bool setSink(const char *scenarioXml);
+	const char *getSinkFile(void) { return m_Sinkfile.c_str();}
+	bool configureSink(void) { return m_sink.configureSink(); }
+
+	uint64_t getCurrentTime(void) const { return m_sink.getCurrentTime(); }
 
 	// Push the selected part of the tracks to sink
-	bool play(void);
+	bool step(void);
+
+	bool play(bool playFast);
+	bool stop(void);
+
+	bool rewind(void) { return m_track.rewind(); }
 
 	// Save and load workspace
-	bool save(const char *filename) { m_Filename = filename; return false; };
-	bool load(const char *filename) { return false; };
+	bool save(const char *filename);
+	bool load(const char *filename);
+
+protected:
 
 	OpenViBE::Kernel::IKernelContext& m_KernelContext;
 
 	Track m_track;
-	Sink m_output;
+	Sink m_sink;
 
-	std::string m_Filename;
-
+	std::string m_Trackfile;
+	std::string m_Sinkfile;
 };

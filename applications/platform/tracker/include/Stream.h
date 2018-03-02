@@ -19,12 +19,12 @@ public:
 	Stream(void) : StreamBase() { };
 	// (OpenViBE::Kernel::IKernelContext& ctx) : Stream(ctx) {} ;
 
-	virtual ~Stream(void) { };
+	virtual ~Stream(void) { if(m_Header) { delete m_Header; } clear(); };
 
 	virtual OpenViBE::CIdentifier getTypeIdentifier(void) const override { return T::getTypeIdentifier(); };
 
-	virtual const typename T::Header& getHeader(void) const { return m_Header; };
-	virtual bool setHeader(typename T::Header& header) { m_Header = header; return true; }
+	virtual const typename T::Header& getHeader(void) const { return *m_Header; };
+	virtual bool setHeader(typename T::Header* header) { m_Header = header; return true; }
 
 	virtual bool push(typename T::Buffer* chunk) { m_Chunks.push_back(chunk); return true; };
 
@@ -51,11 +51,14 @@ public:
 
 	virtual uint64_t getChunkCount(void) const override { return m_Chunks.size(); };
 
-	virtual bool clear(void) { m_Chunks.clear(); StreamBase::m_position = 0; return true; };
+	virtual bool clear(void) { 
+		std::for_each(m_Chunks.begin(),m_Chunks.end(), [](typename T::Buffer* ptr) { delete ptr; } ); 
+		m_Chunks.clear(); StreamBase::m_position = 0; return true; 
+	};
 
 protected:
 
-	typename T::Header m_Header;
+	typename T::Header* m_Header = nullptr;
 
  	std::vector<typename T::Buffer*> m_Chunks;
 
