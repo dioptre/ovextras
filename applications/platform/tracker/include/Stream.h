@@ -37,7 +37,7 @@ public:
 	virtual bool peek(uint64_t timePoint, typename T::Buffer** ptr) { return Stream::peek(timePoint, reinterpret_cast<TypeBase::Buffer**>(ptr)); 
 	}
 
-	virtual bool peek(uint64_t timePoint, TypeBase::Buffer** ptr) override { 
+	virtual bool peek(uint64_t timePoint, TypeBase::Buffer** ptr) const override { 
 		// @fixme inefficient; could improve with binary search if needed
 		auto it = std::find_if(m_Chunks.begin(), m_Chunks.end(), 
 			[timePoint](const typename T::Buffer* b) { return (timePoint >= b->m_bufferStart && timePoint < b->m_bufferEnd); });
@@ -49,7 +49,12 @@ public:
 	}
 
 
-	virtual uint64_t getChunkCount(void) const override { return m_Chunks.size(); };
+	virtual size_t getChunkCount(void) const override { return m_Chunks.size(); };
+	virtual bool getChunk(size_t idx, typename T::Buffer** ptr) const { 
+		if(idx<m_Chunks.size()) 
+		{ *ptr = m_Chunks[idx]; return true; } 
+		else 
+		{ *ptr = nullptr; return false; } };
 
 	virtual bool clear(void) { 
 		std::for_each(m_Chunks.begin(),m_Chunks.end(), [](typename T::Buffer* ptr) { delete ptr; } ); 

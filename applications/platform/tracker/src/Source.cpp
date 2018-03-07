@@ -1,4 +1,8 @@
 
+//
+// @note some ov files which have lots of stimulation chunks take long time to import
+// when launching tracker from visual studio. this is probably due to memory allocation, similar to slow simple dsp grammar parsing.
+//
 #include "Source.h"
 
 #include <iostream>
@@ -189,7 +193,7 @@ void Source::processChildData(const void* pBuffer, const uint64 ui64BufferSize)
 	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_StreamIndex)
 	{
-		m_ChunkStreamIndex = (uint32)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize);
+		m_ChunkStreamIndex = (uint32)m_oReaderHelper.getUIntegerFromChildData(pBuffer, ui64BufferSize); // @note if trying to do -1 to  map to [0,...] convention, something breaks
 	}
 	if(l_rTop==OVP_NodeId_OpenViBEStream_Buffer_StartTime)
 	{

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Track.h"
+
 #include "Sink.h"
 
 #include <openvibe/ov_all.h>
@@ -15,6 +16,8 @@ public:
 	// Set an EEG file to the workspace (@todo change to 'addTrack' for multiple files)
 	bool setTrack(const char *filename);
 	const char *getTrackFile(void) { return m_Trackfile.c_str();}
+
+	const Track& getTrack(void) const { return m_track; }
 
 	// Set output for chunks
 	bool setSink(const char *scenarioXml);
@@ -44,4 +47,5 @@ protected:
 
 	std::string m_Trackfile;
 	std::string m_Sinkfile;
+
 };

@@ -1849,7 +1849,8 @@ possible...</property>
                       <object class="GtkViewport" id="tracker-scenario_viewport">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="resize_mode">queue</property>
+                       <!-- <property name="resize_mode">queue</property> -->
+						<property name="double_buffered">False</property>						
                         <child>
                           <object class="GtkDrawingArea" id="tracker-scenario_drawing_area">
                             <property name="visible">True</property>

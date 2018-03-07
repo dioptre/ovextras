@@ -17,6 +17,14 @@
 
 #include "GUI.h"
 
+#include "TrackRenderer.h"
+
+#include "TypeSignal.h"
+#include "Stream.h."
+
+#include <system/ovCMath.h>
+#include <algorithm>
+
 using namespace OpenViBE;
 using namespace OpenViBE::Kernel;
 using namespace std;
@@ -34,6 +42,15 @@ gboolean fIdleApplicationLoop(gpointer pUserData)
 	gui->step();
 
 	return TRUE;
+}
+
+GUI::~GUI() 
+{ 	
+	if(m_Renderer)
+	{
+		m_Renderer->uninitialize();
+		delete m_Renderer;
+	}
 }
 
 bool GUI::initGUI(int argc, char *argv[])
@@ -72,7 +89,15 @@ bool GUI::initGUI(int argc, char *argv[])
 
 	g_idle_add(fIdleApplicationLoop, this);
 
+	::GtkWidget* l_pTrackWindow=GTK_WIDGET(gtk_builder_get_object(m_pInterface, "tracker-scenario_drawing_area"));
+
+	//@todo refactor the whole thing that follows, here just to test the renderer
+	m_Renderer = new TrackRenderer();
+	m_Renderer->initialize(l_pTrackWindow);
+
 	gtk_widget_show(l_pMainWindow);
+
+	redrawTrack();
 
 	return true;
 }
@@ -170,10 +195,50 @@ bool GUI::openFileCB(void)
 	}
 	gtk_widget_destroy(l_pWidgetDialogOpen);
 
+	redrawTrack();
 
 	return true;
 }
 
+bool GUI::redrawTrack(void)
+{
+	uint64_t time = System::Time::zgetTime();
+
+	m_Renderer->m_pRenderer.m_pRenderer->clear(0);
+
+	const Track& tr = m_rTracker.getWorkspace().getTrack();
+	const Stream<TypeSignal>* ptr = nullptr;
+
+	for(size_t i=0;i<tr.getNumStreams();i++)
+	{
+		if(tr.getStream(i) && tr.getStream(i)->getTypeIdentifier()==OV_TypeId_Signal)
+		{
+			ptr = reinterpret_cast< const Stream<TypeSignal>* >(tr.getStream(i));
+			break;
+		}
+	}
+	if(ptr)
+	{
+		uint64_t numChunks = std::min<uint64>(100,(uint64_t)ptr->getChunkCount());
+
+		for(uint32_t i=0;i<numChunks;i++)
+		{
+			TypeSignal::Buffer* buf;
+
+			ptr->getChunk(i, &buf);
+
+			m_Renderer->push(buf->m_buffer);
+		}
+	}
+
+	m_Renderer->m_pRenderer.m_pRendererContext->setScale(1);
+	m_Renderer->m_pRenderer.m_pRenderer->refresh(*m_Renderer->m_pRenderer.m_pRendererContext);
+	m_Renderer->redraw(true);
+
+	std::cout << "Track redraw took " << ITimeArithmetics::timeToSeconds(System::Time::zgetTime() - time)*1000 << "ms\n";
+
+	return true;
+}
 
 bool GUI::openSinkCB(void)
 {

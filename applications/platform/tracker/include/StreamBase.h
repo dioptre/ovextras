@@ -20,7 +20,7 @@ public:
 	virtual OpenViBE::CIdentifier getTypeIdentifier(void) const = 0;
 
 	virtual bool peek(const TypeBase::Buffer** ptr) const = 0;
-	virtual bool peek(uint64_t timePoint, TypeBase::Buffer** ptr) = 0;
+	virtual bool peek(uint64_t timePoint, TypeBase::Buffer** ptr) const = 0;
 
 	virtual bool step(void) { if(m_position <= getChunkCount() ) { m_position++; return true; } else { return false; } } ;
 	virtual bool rewind(void) { m_position = 0; return true; };
@@ -30,7 +30,8 @@ public:
 
 	virtual bool clear(void) = 0;
 
-	virtual uint64_t getChunkCount(void) const = 0;
+	virtual size_t getChunkCount(void) const = 0;
+//	virtual bool getChunk(size_t idx, TypeBase::Buffer **ptr) const = 0;
 
 protected:
 

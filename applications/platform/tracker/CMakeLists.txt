@@ -13,8 +13,18 @@ SET(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_
 
 FILE(GLOB_RECURSE source_files src/*.cpp src/*.h src/*.inl include/*.h)
 
+# @FIXME bad hack, it'd be better for Designer to export these
+SET(OV_AVP_PATH "${CMAKE_SOURCE_DIR}/../designer/plugins/visualization/ovp-advanced-visualization/src/")
+LIST(APPEND source_files ${OV_AVP_PATH}/m_defines.hpp
+  ${OV_AVP_PATH}/m_GtkGL.cpp
+  ${OV_AVP_PATH}/m_GtkGL.hpp
+  ${OV_AVP_PATH}/m_VisualizationTools.cpp
+  ${OV_AVP_PATH}/m_VisualizationTools.hpp
+  ${OV_AVP_PATH}/mTGtkGLWidget.hpp)
+
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 INCLUDE_DIRECTORIES("include")
+INCLUDE_DIRECTORIES(${OV_AVP_PATH})
 
 INCLUDE("FindOpenViBE")
 INCLUDE("FindOpenViBECommon")
@@ -25,6 +35,9 @@ INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleFS")
 INCLUDE("FindThirdPartyGTK")
 INCLUDE("FindThirdPartyBoost_System")
+INCLUDE("FindThirdPartyOpenGL")
+INCLUDE("FindOpenViBEVisualizationToolkit")
+INCLUDE("FindLibMensiaAdvancedVisualisation")
 
 IF(WIN32)	
 	# @FIXME CERT getting timeBeginPeriod() linker issues without this

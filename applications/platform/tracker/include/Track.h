@@ -32,16 +32,21 @@ public:
 	// Basically an iterator; should only return part covered by m_vSelection; @todo may need re-epoching
 	bool getNextStream(StreamBase** output);
 
+	uint64_t getNumStreams(void) const { return m_Streams.size(); };
+	const StreamBase* getStream(uint64_t idx) const;
+
 //	bool getNextChunk(uint64_t idx, const StreamChunk** output);
 
 	uint64_t getSamplingRate(void) const;
+
+protected:
 
 	Selection m_Selection;          // Which parts of the dataset have been selected
 
 	std::string m_Name;
 
-	std::map<uint64_t, StreamBase*> m_Streams;
- 	std::map<uint64_t, DecoderBase*> m_Decoders;
+	std::vector<StreamBase*> m_Streams;
+ 	std::vector<DecoderBase*> m_Decoders;
 
 	OpenViBE::Kernel::IKernelContext& m_KernelContext;
 

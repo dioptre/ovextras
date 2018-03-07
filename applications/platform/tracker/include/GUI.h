@@ -8,6 +8,7 @@
 
 // Forward declare
 struct _GtkBuilder;
+class TrackRenderer;
 
 class GUI {
 
@@ -17,6 +18,8 @@ public:
 	{
 		initGUI(argc, argv);
 	}
+	~GUI();
+
 	bool run();
 	
 	bool step();
@@ -32,7 +35,11 @@ protected:
 	bool playFastCB(void);
 	bool sinkPropertiesCB(void);
 
+	bool redrawTrack(void);
+
 	Tracker& m_rTracker;
+
+	TrackRenderer* m_Renderer = nullptr;
 
 	struct _GtkBuilder* m_pInterface = nullptr;
 

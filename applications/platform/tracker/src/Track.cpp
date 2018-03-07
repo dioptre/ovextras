@@ -13,18 +13,23 @@
 
 bool Track::initialize(const char *filename) 
 { 
+	//reset first
+	uninitialize();
+
 	Source loader;
 
 	loader.initialize(filename);
-		
+	
 //	uint32 cnt = 0; 
 	MemoryBufferWithType buf;
-	while(loader.pullChunk(buf))
+	while(loader.pullChunk(buf))	
 	{	
-		auto it = m_Streams.find(buf.streamIndex);
-		if(it == m_Streams.end())
+		if(buf.streamIndex>=m_Streams.size())
 		{
 			// New stream; could use factory here
+			m_Streams.resize(buf.streamIndex+1, nullptr);
+			m_Decoders.resize(buf.streamIndex+1, nullptr);
+
 			if(buf.streamType==OV_TypeId_Signal)
 			{
 				Stream<TypeSignal>* tmp = new Stream<TypeSignal>();
@@ -43,7 +48,11 @@ bool Track::initialize(const char *filename)
 				continue;
 			}
 		}
-		m_Decoders[buf.streamIndex]->decode(buf);
+
+		if(m_Decoders[buf.streamIndex])
+		{
+			m_Decoders[buf.streamIndex]->decode(buf);
+		}
 	}
 	
 	std::cout << "Streams initialized ok\n";
@@ -53,15 +62,25 @@ bool Track::initialize(const char *filename)
 
 bool Track::uninitialize(void)
 {
+	for(size_t i=0;i<m_Decoders.size();i++)
+	{
+		delete m_Decoders[i];
+	}
+	m_Decoders.clear();
+	for(size_t i=0;i<m_Streams.size();i++)
+	{
+		delete m_Streams[i];
+	}
+	m_Streams.clear();
+
 	return true;
-//	return m_Dataset.uninitialize();
 }
 
 bool Track::rewind(void)
 {
 	bool returnValue = true;
 
-	std::for_each(m_Streams.begin(), m_Streams.end(), [&returnValue](std::pair<uint64_t, StreamBase*> entry) { returnValue &= entry.second->rewind(); } );
+	std::for_each(m_Streams.begin(), m_Streams.end(), [&returnValue](StreamBase* entry) { returnValue &= entry->rewind(); } );
 
 	return returnValue;
 }
@@ -71,15 +90,26 @@ uint64_t Track::getSamplingRate(void) const
 	// @fixme picks rate of first signal stream
 	for(auto it = m_Streams.begin();it!=m_Streams.end();it++)
 	{
-		StreamBase* ptr = it->second;
-		if( ptr->getTypeIdentifier()==OV_TypeId_Signal)
+		if( (*it)->getTypeIdentifier()==OV_TypeId_Signal)
 		{
-			Stream<TypeSignal>* tmp = reinterpret_cast< Stream<TypeSignal>* >(ptr);
+			Stream<TypeSignal>* tmp = reinterpret_cast< Stream<TypeSignal>* >(*it);
 			const TypeSignal::Header& head = tmp->getHeader();
 			return head.m_samplingFrequency;
 		}
 	}
 	return 0;
+}
+
+const StreamBase* Track::getStream(uint64_t idx) const 
+{
+	if(idx<m_Streams.size())
+	{
+		return m_Streams[idx];
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 bool Track::getNextStream(StreamBase** output)
@@ -97,13 +127,13 @@ bool Track::getNextStream(StreamBase** output)
 
 	for(auto it = m_Streams.begin();it!=m_Streams.end();it++)
 	{
-		StreamBase* ptr = it->second;
+		StreamBase* ptr = *it;
 
 		const TypeBase::Buffer* nextChunk;
 		if(ptr->peek(&nextChunk) && nextChunk->m_bufferStart < earliest)
 		{
 			earliest = nextChunk->m_bufferStart;
-			earliestPtr = it->second;
+			earliestPtr = *it;
 		}
 	}
 

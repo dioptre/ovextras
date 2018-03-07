@@ -38,6 +38,9 @@ public:
 			tmp->m_bufferStart = chunk.bufferStart;
 			tmp->m_bufferEnd = chunk.bufferEnd;
 
+			// static uint32_t cnt = 0;
+			// std::cout << "Decoded " << cnt++ << "buffers\n";
+
 			m_Target->push(tmp);
 		}
 		return true;

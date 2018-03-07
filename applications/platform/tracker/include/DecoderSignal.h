@@ -31,6 +31,8 @@ public:
 			OpenViBE::IMatrix* decoded = m_decoder.getOutputMatrix();
 			OpenViBEToolkit::Tools::Matrix::copy(header->m_header, *decoded);
 
+//			std::cout << "H " << decoded->getBufferElementCount() << " " << header->m_header.getBufferElementCount()<< "\n";
+
 			m_Target->setHeader(header);
 		}
 
@@ -42,6 +44,8 @@ public:
 			OpenViBEToolkit::Tools::Matrix::copy(tmp->m_buffer, *decoded);
 			tmp->m_bufferStart = chunk.bufferStart;
 			tmp->m_bufferEnd = chunk.bufferEnd;
+
+// 			std::cout << "B " << decoded->getBufferElementCount() << " " << tmp->m_buffer.getBufferElementCount()<< "\n";
 
 			m_Target->push(tmp);
 		}
