@@ -12,7 +12,7 @@
 #include <iostream>
 
 #include <mensia/advanced-visualization.h>
-#include <m_GtkGl.hpp>
+#include <m_GtkGL.hpp>
 
 #include "TrackRenderer.h"
 

@@ -24,7 +24,7 @@
 #include "TrackRenderer.h"
 
 #include "TypeSignal.h"
-#include "Stream.h."
+#include "Stream.h"
 
 #include <system/ovCMath.h>
 #include <algorithm>

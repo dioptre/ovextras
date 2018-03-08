@@ -56,7 +56,7 @@ if(PATH_LIBADVVIZ)
 	if(LINK_LIBADVVIZ)
 	    # find_library(PATH libadvviz${LIBADVVIZ_LINKING} PATHS ${DESIGNER_SDK_PATH}/lib NO_DEFAULT_PATH)
 #		set(VISUALIZATION_TOOLKIT_LIBRARY ${DESIGNER_SDK_PATH}/lib/${LIB_PREFIX}libadvviz${LIBADVVIZ_LINKING}.${LIB_EXT})
-		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PATH_LIBADVVIZ}/../lib/mensia-advanced-visualization${LIBADVVIZ_LINKING}.${LIB_EXT})	
+		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PATH_LIBADVVIZ}/../lib/${LIB_PREFIX}mensia-advanced-visualization${LIBADVVIZ_LINKING}.${LIB_EXT})	
 	endif()
 
 	add_definitions(-DTARGET_HAS_LibAdvancedVisualization)

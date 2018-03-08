@@ -426,7 +426,7 @@ bool Sink::pull(StreamBase* stream)
 			}
 
 			m_SamplingRate = head.m_samplingFrequency;
-			m_ChunkSize = head.m_header.getDimensionSize(0);
+			m_ChunkSize = head.m_header.getDimensionSize(1);
 
 			m_OutputEncoder->ip_ui64SignalSamplingRate = m_SamplingRate;
 			m_OutputEncoder->ip_ui64BufferDuration = ITimeArithmetics::sampleCountToTime(m_SamplingRate, m_ChunkSize);
