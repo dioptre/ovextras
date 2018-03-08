@@ -80,7 +80,7 @@ bool Track::rewind(void)
 {
 	bool returnValue = true;
 
-	std::for_each(m_Streams.begin(), m_Streams.end(), [&returnValue](StreamBase* entry) { returnValue &= entry->rewind(); } );
+	std::for_each(m_Streams.begin(), m_Streams.end(), [&returnValue](StreamBase* entry) { if(entry) { returnValue &= entry->rewind(); } } );
 
 	return returnValue;
 }
@@ -130,7 +130,7 @@ bool Track::getNextStream(StreamBase** output)
 		StreamBase* ptr = *it;
 
 		const TypeBase::Buffer* nextChunk;
-		if(ptr->peek(&nextChunk) && nextChunk->m_bufferStart < earliest)
+		if(ptr && ptr->peek(&nextChunk) && nextChunk->m_bufferStart < earliest)
 		{
 			earliest = nextChunk->m_bufferStart;
 			earliestPtr = *it;

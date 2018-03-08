@@ -8,6 +8,8 @@
 
 // Forward declare
 struct _GtkBuilder;
+typedef struct _GtkWidget   GtkWidget;
+
 class TrackRenderer;
 
 class GUI {
@@ -34,7 +36,10 @@ protected:
 	bool playCB(void);
 	bool playFastCB(void);
 	bool sinkPropertiesCB(void);
+	bool hSliderCB(GtkWidget* widget);
+	bool hScaleCB(GtkWidget* widget);
 
+	bool resetSliderLimits(void);
 	bool redrawTrack(void);
 
 	Tracker& m_rTracker;
@@ -42,6 +47,13 @@ protected:
 	TrackRenderer* m_Renderer = nullptr;
 
 	struct _GtkBuilder* m_pInterface = nullptr;
+	
+	GtkWidget* m_hScrollbar = nullptr;
+	GtkWidget* m_hScale = nullptr;
+	
+	uint64_t m_numChannels = 0;
+	uint64_t m_chunkSize = 0;
+	uint64_t m_totalChunks = 0;
 
 	uint64_t m_PreviousTime = 0;
 };

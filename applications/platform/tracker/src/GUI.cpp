@@ -3,6 +3,10 @@
 //
 // @author J.T. Lindgren
 // 
+// @todo connect all the vertical and horizontal sliders and scales
+// @todo make horizontal scale related to seconds rather than chunks
+// @todo add rulers
+// @todo need a much more clear design to handle multiple tracks with multiple streams of different sizes
 
 #include <openvibe/ov_all.h>
 #include <toolkit/ovtk_all.h>
@@ -31,9 +35,13 @@ using namespace std;
 
 
 #define GTK_CALLBACK_MAPPER(MENUCHOICE, ACTION, MEMBERFUN) \
-	auto MEMBERFUN = [](::GtkMenuItem* pMenuItem, gpointer pUserData) { static_cast<GUI*>(pUserData)->MEMBERFUN(); }; \
+	auto MEMBERFUN = [](::GtkWidget* pMenuItem, gpointer pUserData) { static_cast<GUI*>(pUserData)->MEMBERFUN(); }; \
 	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pInterface, MENUCHOICE)),  \
-		ACTION, G_CALLBACK( (void (*)( ::GtkMenuItem* pMenuItem, gpointer pUserData)) MEMBERFUN ), this); 
+		ACTION, G_CALLBACK( (void (*)( ::GtkWidget* pMenuItem, gpointer pUserData)) MEMBERFUN ), this); 
+#define GTK_CALLBACK_MAPPER_PARAM(MENUCHOICE, ACTION, MEMBERFUN) \
+	auto MEMBERFUN = [](::GtkWidget* pMenuItem, gpointer pUserData) { static_cast<GUI*>(pUserData)->MEMBERFUN(pMenuItem); }; \
+	g_signal_connect(G_OBJECT(gtk_builder_get_object(m_pInterface, MENUCHOICE)),  \
+		ACTION, G_CALLBACK( (void (*)( ::GtkWidget* pMenuItem, gpointer pUserData)) MEMBERFUN ), this); 
 
 gboolean fIdleApplicationLoop(gpointer pUserData)
 {
@@ -74,6 +82,9 @@ bool GUI::initGUI(int argc, char *argv[])
 	GTK_CALLBACK_MAPPER("tracker-button_forward", "clicked", playFastCB);
 	GTK_CALLBACK_MAPPER("tracker-button_stop", "clicked", stopCB);
 	GTK_CALLBACK_MAPPER("tracker-sink-properties", "clicked", sinkPropertiesCB);	
+	// GTK_CALLBACK_MAPPER_PARAM("adj-h-pos", "value-changed", hSliderCB);
+	GTK_CALLBACK_MAPPER_PARAM("hscrollbar1", "value-changed", hSliderCB);
+	GTK_CALLBACK_MAPPER_PARAM("hscale1", "value-changed", hScaleCB);
 
 	char basename[512]; 
 
@@ -84,6 +95,9 @@ bool GUI::initGUI(int argc, char *argv[])
 	tmp =  GTK_ENTRY(gtk_builder_get_object(m_pInterface, "tracker-sink-file"));
 	FS::Files::getFilename(m_rTracker.getWorkspace().getSinkFile(), basename, 512);
 	gtk_entry_set_text(tmp, basename);
+
+	m_hScrollbar = GTK_WIDGET(gtk_builder_get_object(m_pInterface, "hscrollbar1"));
+	m_hScale = GTK_WIDGET(gtk_builder_get_object(m_pInterface, "hscale1"));
 
 	gtk_builder_connect_signals(m_pInterface, NULL);
 
@@ -97,6 +111,7 @@ bool GUI::initGUI(int argc, char *argv[])
 
 	gtk_widget_show(l_pMainWindow);
 
+	resetSliderLimits();
 	redrawTrack();
 
 	return true;
@@ -195,16 +210,18 @@ bool GUI::openFileCB(void)
 	}
 	gtk_widget_destroy(l_pWidgetDialogOpen);
 
+	resetSliderLimits();
 	redrawTrack();
 
 	return true;
 }
 
-bool GUI::redrawTrack(void)
+bool GUI::resetSliderLimits(void)
 {
-	uint64_t time = System::Time::zgetTime();
 
-	m_Renderer->m_pRenderer.m_pRenderer->clear(0);
+	m_totalChunks = 0;
+	m_numChannels = 0;
+	m_chunkSize = 0;
 
 	const Track& tr = m_rTracker.getWorkspace().getTrack();
 	const Stream<TypeSignal>* ptr = nullptr;
@@ -219,9 +236,61 @@ bool GUI::redrawTrack(void)
 	}
 	if(ptr)
 	{
-		uint64_t numChunks = std::min<uint64>(100,(uint64_t)ptr->getChunkCount());
+		// Count samples first
+		TypeSignal::Buffer* buf;
+		ptr->getChunk(0, &buf);
+		if(buf && buf->m_buffer.getDimensionCount()==2) 
+		{
+			m_totalChunks = ptr->getChunkCount();
+			m_numChannels = buf->m_buffer.getDimensionSize(0);
+			m_chunkSize = buf->m_buffer.getDimensionSize(1);
+		}
+	}
 
-		for(uint32_t i=0;i<numChunks;i++)
+	if(m_totalChunks<2) { std::cout << "Warning: File has less than 2 chunks, ranges may behave oddly\n"; }
+
+	const uint32_t chunksPerView = std::min<uint32_t>(20,m_totalChunks-1);
+
+	gtk_range_set_range(GTK_RANGE(m_hScale), 1, m_totalChunks-1);
+	gtk_range_set_value(GTK_RANGE(m_hScale), chunksPerView);
+
+	gtk_range_set_range(GTK_RANGE(m_hScrollbar), 0, m_totalChunks-chunksPerView);
+	gtk_range_set_value(GTK_RANGE(m_hScrollbar), 0);
+
+	// gtk_range_set_value(GTK_RANGE(m_hScrollbar), 0);
+	// gtk_range_set_round_digits(GTK_RANGE(m_hScrollbar), 0); //not in gtk ver we use on Windows
+	gtk_range_set_increments(GTK_RANGE(m_hScrollbar), chunksPerView, 10*chunksPerView);
+
+	return true;
+
+}
+
+bool GUI::redrawTrack(void)
+{
+	uint64_t time = System::Time::zgetTime();
+
+	const Track& tr = m_rTracker.getWorkspace().getTrack();
+	const Stream<TypeSignal>* ptr = nullptr;
+
+	for(size_t i=0;i<tr.getNumStreams();i++)
+	{
+		if(tr.getStream(i) && tr.getStream(i)->getTypeIdentifier()==OV_TypeId_Signal)
+		{
+			ptr = reinterpret_cast< const Stream<TypeSignal>* >(tr.getStream(i));
+			break;
+		}
+	}
+	if(ptr)
+	{
+		const uint32_t firstChunk = static_cast<uint32_t>( gtk_range_get_value(GTK_RANGE(m_hScrollbar)));
+		const uint32_t chunksPerView = static_cast<uint32_t>( gtk_range_get_value(GTK_RANGE(m_hScale)));
+		const uint32_t lastChunk = std::min<uint32_t>(firstChunk+chunksPerView, m_totalChunks);
+		const uint32_t chunksInRange = lastChunk-firstChunk;
+
+		m_Renderer->reset(m_numChannels, chunksInRange*m_chunkSize);
+
+		// Push all chunks to renderer
+		for(uint32_t i=firstChunk;i<lastChunk;i++)
 		{
 			TypeSignal::Buffer* buf;
 
@@ -231,11 +300,11 @@ bool GUI::redrawTrack(void)
 		}
 	}
 
-	m_Renderer->m_pRenderer.m_pRendererContext->setScale(1);
+	m_Renderer->m_pRenderer.m_pRendererContext->setScale(0.5);
 	m_Renderer->m_pRenderer.m_pRenderer->refresh(*m_Renderer->m_pRenderer.m_pRendererContext);
 	m_Renderer->redraw(true);
 
-	std::cout << "Track redraw took " << ITimeArithmetics::timeToSeconds(System::Time::zgetTime() - time)*1000 << "ms\n";
+	// std::cout << "Track redraw took " << ITimeArithmetics::timeToSeconds(System::Time::zgetTime() - time)*1000 << "ms\n";
 
 	return true;
 }
@@ -331,6 +400,28 @@ bool GUI::sinkPropertiesCB(void)
 {
 	return m_rTracker.getWorkspace().configureSink();
 }
+
+bool GUI::hSliderCB(GtkWidget* widget)
+{
+//	std::cout << "Hslider " << gtk_range_get_value(GTK_RANGE(widget)) << "\n";
+
+	redrawTrack();
+	return true;
+}
+
+bool GUI::hScaleCB(GtkWidget* widget)
+{
+	// @since we store the pointers in the class, no need to pass in widget...
+//	std::cout << "Hscale " << gtk_range_get_value(GTK_RANGE(widget)) << "\n";
+
+	const uint32_t chunksPerView = static_cast<uint32_t>( gtk_range_get_value(GTK_RANGE(widget)));
+
+	gtk_range_set_range(GTK_RANGE(m_hScrollbar), 0, m_totalChunks-chunksPerView);
+
+	redrawTrack();
+	return true;
+}
+
 
 #if 0 
 

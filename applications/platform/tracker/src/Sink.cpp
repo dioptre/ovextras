@@ -303,7 +303,11 @@ bool Sink::configureSink(void)
 
 bool Sink::initialize(const char *xmlFile) 
 { 
-
+	if(!xmlFile || !xmlFile[0])
+	{
+		std::cout << "Error: Cannot initialize sink without a file\n";
+		return false;
+	}
 
 	std::cout << "Sink: Initializing with "	<< xmlFile << "\n";
 	
@@ -475,6 +479,12 @@ bool Sink::pull(StreamBase* stream)
 
 bool Sink::play(bool playFast)
 {
+	if(m_xmlFilename.length()==0)
+	{
+		std::cout << "Error: No sink initialized\n";
+		return false;
+	}
+
 	m_ChunksSent = 0;
 	m_PreviousChunkEnd = 0;
 	m_PlayFast = playFast;	// @todo To work neatly it'd be better to be able to pass in the chunk times to the designer side

@@ -102,29 +102,37 @@ bool TrackRenderer::uninitialize(void)
 	return true;
 }
 
+bool TrackRenderer::reset(uint32_t totalChannelCount, uint32_t totalSampleCount)
+{
+	m_pRenderer.m_pRenderer->clear(0);
+	m_pRenderer.m_pRendererContext->clear();
+
+	for(uint32_t i=0;i<totalChannelCount;i++)
+	{
+		char name[512];
+		sprintf(name, "%d",i);
+		m_pRenderer.m_pRendererContext->addChannel(name);
+	}
+
+	m_pRenderer.m_pRenderer->setChannelCount(totalChannelCount);
+	m_pRenderer.m_pRenderer->setSampleCount(totalSampleCount);
+
+	m_pRenderer.m_pRenderer->rebuild(*m_pRenderer.m_pRendererContext);
+
+	return true;
+}
 
 bool TrackRenderer::push(const OpenViBE::CMatrix& chunk)
 {
 
+	/*
 	if(chunk.getDimensionCount() == 2 && 
 		(chunk.getDimensionSize(0) != m_pRenderer.m_pRenderer->getChannelCount() 
 		   || m_pRenderer.m_pRenderer->getSampleCount() % chunk.getDimensionSize(1) !=0))
 	{
-		m_pRenderer.m_pRenderer->clear(0);
-		m_pRenderer.m_pRendererContext->clear();
 
-		for(uint32_t i=0;i<chunk.getDimensionSize(0);i++)
-		{
-			char name[512];
-			sprintf(name, "%d",i);
-			m_pRenderer.m_pRendererContext->addChannel(name);
-		}
-
-		m_pRenderer.m_pRenderer->setChannelCount(chunk.getDimensionSize(0));
-		m_pRenderer.m_pRenderer->setSampleCount(100*chunk.getDimensionSize(1));
-
-		m_pRenderer.m_pRenderer->rebuild(*m_pRenderer.m_pRendererContext);
 	}
+	*/
 
 	// @todo refactor to separate 64bit->32bit float conversion routine; use fixed memory buffer
 	uint64_t numFloats = chunk.getBufferElementCount();
@@ -144,6 +152,14 @@ bool TrackRenderer::push(const OpenViBE::CMatrix& chunk)
 
 bool TrackRenderer::redraw(bool bImmediate /* = false */)
 {
+	const uint32_t numSamples =  m_pRenderer.m_pRenderer->getSampleCount();
+	const float pixelsPerSample = 0.01;
+	const float pixelsPerChannel = 100;
+
+	// const float widthNeeded =  numSamples * pixelsPerSample;
+	// const float heightNeeded = m_pRenderer.m_pRenderer->getChannelCount() * pixelsPerChannel;
+	// gtk_drawing_area_size(GTK_DRAWING_AREA(m_pViewport), uint32_t(widthNeeded), uint32_t(heightNeeded));
+
 	bool m_bRedrawNeeded = true;
 	uint64_t m_ui64LastRenderTime = 0;
 
@@ -159,6 +175,8 @@ bool TrackRenderer::redraw(bool bImmediate /* = false */)
 		m_ui64LastRenderTime = l_ui64CurrentTime;
 		m_bRedrawNeeded = false;
 	}
+
+
 
 	return true;
 }

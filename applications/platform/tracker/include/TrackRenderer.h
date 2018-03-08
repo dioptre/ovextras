@@ -50,6 +50,7 @@ public:
 	bool redraw(bool bImmediate=false);
 	bool reshape(uint32_t width, uint32_t height);
 
+	bool reset(uint32_t totalChannelCount, uint32_t totalSampleCount);
 	bool push(const OpenViBE::CMatrix& chunk);
 
 	Renderer m_pRenderer;
