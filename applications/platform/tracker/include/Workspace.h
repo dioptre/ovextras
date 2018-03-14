@@ -3,7 +3,8 @@
 
 #include "Track.h"
 
-#include "Sink.h"
+// #include "Sink.h"
+#include "SinkExternalProcessing.h"
 
 #include <openvibe/ov_all.h>
 
@@ -43,7 +44,8 @@ protected:
 	OpenViBE::Kernel::IKernelContext& m_KernelContext;
 
 	Track m_track;
-	Sink m_sink;
+	// Sink m_sink;
+	SinkExternalProcessing m_sink;
 
 	std::string m_Trackfile;
 	std::string m_Sinkfile;

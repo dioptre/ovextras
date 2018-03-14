@@ -20,17 +20,17 @@ public:
 
 	Sink(OpenViBE::Kernel::IKernelContext& KernelContext) : m_KernelContext(KernelContext) {};
 
-	bool initialize(const char *xmlFile);
-	bool uninitialize(void);
+	virtual bool initialize(const char *xmlFile);
+	virtual bool uninitialize(void);
 
-	bool configureSink(void);
+	virtual bool configureSink(void);
 
-	bool pull(StreamBase* stream);
+	virtual bool pull(StreamBase* stream);
 
-	bool play(bool playFast);
-	bool stop(void);
+	virtual bool play(bool playFast);
+	virtual bool stop(void);
 
-	uint64_t getCurrentTime(void) const;
+	virtual uint64_t getCurrentTime(void) const;
 
 public:
 
@@ -55,7 +55,7 @@ public:
 
 	std::string m_xmlFilename;
 
-private:
+protected:
 
 	OpenViBE::Kernel::IKernelContext& m_KernelContext;
 

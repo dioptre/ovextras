@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <algorithm>
 
 #include "Track.h"
 #include "Source.h"
@@ -32,15 +33,15 @@ bool Track::initialize(const char *filename)
 
 			if(buf.streamType==OV_TypeId_Signal)
 			{
-				Stream<TypeSignal>* tmp = new Stream<TypeSignal>();
-				m_Streams[buf.streamIndex] = tmp;
-				m_Decoders[buf.streamIndex] = new DecoderSignal(m_KernelContext, tmp);
+				Stream<TypeSignal>* targetStream = new Stream<TypeSignal>();
+				m_Streams[buf.streamIndex] = targetStream;
+				m_Decoders[buf.streamIndex] = new DecoderSignal(m_KernelContext, targetStream);
 			}
 			else if (buf.streamType==OV_TypeId_Stimulations)
 			{
-				Stream<TypeStimulation>* tmp = new Stream<TypeStimulation>();
-				m_Streams[buf.streamIndex] = tmp;
-				m_Decoders[buf.streamIndex] = new DecoderStimulation(m_KernelContext, tmp);
+				Stream<TypeStimulation>* targetStream = new Stream<TypeStimulation>();
+				m_Streams[buf.streamIndex] = targetStream;
+				m_Decoders[buf.streamIndex] = new DecoderStimulation(m_KernelContext, targetStream);
 			}
 			else
 			{
@@ -55,6 +56,88 @@ bool Track::initialize(const char *filename)
 		}
 	}
 	
+	// Do global DC cuts ... @todo refactor elsewhere, this is horrible
+	for(size_t i=0;i<m_Streams.size();i++)
+	{
+		if(m_Streams[i] && m_Streams[i]->getTypeIdentifier() == OV_TypeId_Signal)
+		{
+			// Compute DC
+			Stream<TypeSignal>* stream = reinterpret_cast< Stream<TypeSignal>* >(m_Streams[i]);
+			std::vector<OpenViBE::float64> streamMean;
+			streamMean.resize(stream->getHeader().m_header.getDimensionSize(0));
+
+			std::for_each(stream->begin(),stream->end(), 
+				[&streamMean](TypeSignal::Buffer* buf) 
+				{ 
+					std::vector<OpenViBE::float64> chunkSum;
+					chunkSum.resize(buf->m_buffer.getDimensionSize(0));
+					for(size_t j=0;j<buf->m_buffer.getDimensionSize(0);j++)
+					{
+						for(size_t k=0;k<buf->m_buffer.getDimensionSize(1);k++)
+						{
+							chunkSum[j] += buf->m_buffer.getBuffer()[j*buf->m_buffer.getDimensionSize(1)+k];
+						}
+						streamMean[j] += (chunkSum[j]/buf->m_buffer.getDimensionSize(1));
+					}			
+				});
+
+			for(size_t j=0;j<streamMean.size();j++)
+			{
+				streamMean[j] /= stream->getChunkCount();
+			}
+			std::for_each(stream->begin(),stream->end(),
+				[&streamMean](TypeSignal::Buffer* buf)
+				{
+					OpenViBE::float64* bufPtr = buf->m_buffer.getBuffer();
+					for(size_t j=0;j<buf->m_buffer.getDimensionSize(0);j++)
+					{
+						for(size_t k=0;k<buf->m_buffer.getDimensionSize(1);k++)
+						{
+							bufPtr[j*buf->m_buffer.getDimensionSize(1)+k] -= streamMean[j];
+						}	
+					}					
+				});
+
+			/*
+			for(size_t c=0;c<stream->getChunkCount();c++)
+			{
+				TypeSignal::Buffer* buf;
+				stream->getChunk(c, &buf);
+				std::vector<OpenViBE::float64> chunkSum;
+				for(size_t j=0;j<buf->m_buffer.getDimensionSize(0);j++)
+				{
+					for(size_t k=0;k<buf->m_buffer.getDimensionSize(1);k++)
+					{
+						chunkSum[j] += buf->m_buffer.getBuffer()[j*buf->m_buffer.getDimensionSize(1)+k];
+					}
+					streamMean[j] += (chunkSum[j]/buf->m_buffer.getDimensionSize(1));
+				}
+			}
+			for(size_t j=0;j<streamMean.size();j++)
+			{
+				streamMean[j] /= stream->getChunkCount();
+			}
+			
+			// Cut DC
+			for(size_t c=0;c<stream->getChunkCount();c++)
+			{
+				TypeSignal::Buffer* buf;
+				stream->getChunk(c, &buf);
+				std::vector<OpenViBE::float64> chunkSum;
+				OpenViBE::float64* bufPtr = buf->m_buffer.getBuffer();
+				for(size_t j=0;j<buf->m_buffer.getDimensionSize(0);j++)
+				{
+					for(size_t k=0;k<buf->m_buffer.getDimensionSize(1);k++)
+					{
+						bufPtr[j*buf->m_buffer.getDimensionSize(1)+k] -= streamMean[j];
+					}	
+				}
+			}
+			*/
+		}
+
+	}
+
 	std::cout << "Streams initialized ok\n";
 
 	return true;
@@ -112,7 +195,7 @@ const StreamBase* Track::getStream(uint64_t idx) const
 	}
 }
 
-bool Track::getNextStream(StreamBase** output)
+bool Track::getNextStreamIndex(int& earliestIndex) const
 {
 	if(m_Streams.size()==0)
 	{
@@ -122,29 +205,47 @@ bool Track::getNextStream(StreamBase** output)
 	// @todo: check selection here
 
 	// Find the stream with the earliest chunk, return the stream
-	StreamBase* earliestPtr = nullptr;
-	uint64_t earliest = std::numeric_limits<uint64_t>::max();
+	uint64_t earliestTime = std::numeric_limits<uint64_t>::max();
+	bool foundSomething = false;
 
-	for(auto it = m_Streams.begin();it!=m_Streams.end();it++)
+	for(size_t i=0;i<m_Streams.size();i++)
 	{
-		StreamBase* ptr = *it;
+		StreamBase* ptr = m_Streams[i];
 
 		const TypeBase::Buffer* nextChunk;
-		if(ptr && ptr->peek(&nextChunk) && nextChunk->m_bufferStart < earliest)
+		if(ptr && ptr->peek(&nextChunk) && nextChunk->m_bufferStart < earliestTime)
 		{
-			earliest = nextChunk->m_bufferStart;
-			earliestPtr = *it;
+			earliestTime = nextChunk->m_bufferStart;
+			earliestIndex = (int)i;
+			foundSomething = true;
 		}
+		/*
+		if(ptr && ptr->isEof())
+		{
+			uint64_t lastTime = ptr->getLastTime();
+			earliestTime = std::min<uint64_t>(earliestTime, lastTime);
+			foundSomething = true;
+		}
+		*/
 	}
 
-	if(earliestPtr==nullptr)
+	if(!foundSomething)
 	{
 		std::cout << "All streams exhausted\n";
 		return false;
 	}
-
-	*output = earliestPtr;
-
+	
 	return true;
+}
+
+bool Track::getNextStream(StreamBase** output)
+{
+	int idx;
+	if(getNextStreamIndex(idx))
+	{
+		*output = m_Streams[idx];
+		return true;
+	}
+	return false;
 
 }

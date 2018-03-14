@@ -13,6 +13,8 @@ public:
 	class Header : public TypeBase::Header
 	{
 	public:
+		virtual bool getEBML(EBML::IWriterHelper& target) const override; 
+
 		// Header
 		OpenViBE::CMatrix m_header;	
 	};
@@ -20,6 +22,8 @@ public:
 	class Buffer : public TypeBase::Buffer
 	{
 	public:
+		virtual bool getEBML(EBML::IWriterHelper& target) const override;
+
 		// Payload
 		OpenViBE::CMatrix m_buffer;	
 

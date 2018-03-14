@@ -32,6 +32,7 @@ Workspace::~Workspace(void)
 
 bool Workspace::step(void)
 {
+	/*
 	// Get the stream which has the next pending chunk
 	StreamBase* nextStream;
 
@@ -44,7 +45,14 @@ bool Workspace::step(void)
 	}
 
 	return m_sink.pull(nextStream);	
+	*/
 
+	if(!m_sink.pull( m_track ))
+	{
+		m_sink.stop();
+		return false;
+	}
+	return true;
 }
 
 bool Workspace::play(bool playFast) 

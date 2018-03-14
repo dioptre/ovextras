@@ -17,6 +17,7 @@
 #include "TrackRenderer.h"
 
 #include <system/ovCTime.h>
+#include <openvibe/ovITimeArithmetics.h>
 
 using namespace Mensia;
 
@@ -24,7 +25,8 @@ AdvancedVisualization::IRendererContext& getSingletonRendererContext(void);
 
 bool TrackRenderer::initialize(GtkWidget *drawingArea)
 {
-	AdvancedVisualization::IRenderer* l_pRenderer = AdvancedVisualization::IRenderer::create(AdvancedVisualization::IRenderer::RendererType_Line, false);
+	// TRendererStimulation < false, CRendererLine >:new CRendererLine
+	AdvancedVisualization::IRenderer* l_pRenderer = AdvancedVisualization::IRenderer::create(AdvancedVisualization::IRenderer::RendererType_Line, true);
 	if(l_pRenderer == NULL) return false;
 
 	// Creates renderer context
@@ -34,9 +36,11 @@ bool TrackRenderer::initialize(GtkWidget *drawingArea)
 //	m_pRendererContext->setTranslucency(float(m_f64Translucency));
 //	m_pRendererContext->setFlowerRingCount(m_ui64FlowerRingCount);
 	l_pRendererContext->setTimeScale(1.0);
-	l_pRendererContext->setElementCount(11);
+//	l_pRendererContext->setElementCount(11);
 	l_pRendererContext->scaleBy(1);
 	l_pRendererContext->setTranslucency(1.0);
+	l_pRendererContext->setScaleVisibility(true);
+
 //	m_pRendererContext->setAxisDisplay(m_bShowAxis);
 //	m_pRendererContext->setPositiveOnly(m_bIsPositive);
 //	m_pRendererContext->setParentRendererContext(&getContext());
@@ -57,9 +61,16 @@ bool TrackRenderer::initialize(GtkWidget *drawingArea)
 	::GtkWidget* l_pMain=GTK_WIDGET(::gtk_builder_get_object(pBuilder, "table"));
 	::GtkWidget* l_pToolbar=GTK_WIDGET(::gtk_builder_get_object(pBuilder, "toolbar-window"));
 
-	m_pViewport = drawingArea;
+	 gtk_widget_ref(l_pMain);
+     gtk_container_remove(GTK_CONTAINER(l_pWindow), l_pMain);
+   //   gtk_container_add(GTK_CONTAINER(new_parent), widget);
+     gtk_widget_unref(l_pMain);
 
-	// m_pViewport=GTK_WIDGET(::gtk_builder_get_object(pBuilder, "viewport"));
+	gtk_table_attach_defaults(GTK_TABLE(drawingArea), l_pMain, 0, 2, 0, 2);
+
+	// m_pViewport = drawingArea;
+
+	m_pViewport=GTK_WIDGET(::gtk_builder_get_object(pBuilder, "viewport"));
 	m_pTop=GTK_WIDGET(::gtk_builder_get_object(pBuilder, "label_top"));
 	m_pLeft=GTK_WIDGET(::gtk_builder_get_object(pBuilder, "drawingarea_left"));
 	m_pRight=GTK_WIDGET(::gtk_builder_get_object(pBuilder, "drawingarea_right"));
@@ -81,9 +92,11 @@ bool TrackRenderer::initialize(GtkWidget *drawingArea)
 	gtk_widget_realize(l_pWindow);
 	gtk_widget_realize(l_pToolbar);
 
-	m_oColor.r = 1.0;
-	m_oColor.g = 1.0;
-	m_oColor.b = 1.0;
+	gtk_widget_show(l_pMain);
+
+	m_oColor.r = 1;
+	m_oColor.g = 1;
+	m_oColor.b = 1;
 
 	g_object_unref(pBuilder);
 	pBuilder=NULL;
@@ -102,8 +115,10 @@ bool TrackRenderer::uninitialize(void)
 	return true;
 }
 
-bool TrackRenderer::reset(uint32_t totalChannelCount, uint32_t totalSampleCount)
+bool TrackRenderer::reset(uint32_t totalChannelCount, uint32_t totalSampleCount, uint32_t samplingRate)
 {
+	m_FirstChunkTime = (uint64_t)(-1);
+
 	m_pRenderer.m_pRenderer->clear(0);
 	m_pRenderer.m_pRendererContext->clear();
 
@@ -116,23 +131,37 @@ bool TrackRenderer::reset(uint32_t totalChannelCount, uint32_t totalSampleCount)
 
 	m_pRenderer.m_pRenderer->setChannelCount(totalChannelCount);
 	m_pRenderer.m_pRenderer->setSampleCount(totalSampleCount);
+	m_pRenderer.m_pRendererContext->setSampleDuration( OpenViBE::ITimeArithmetics::sampleCountToTime(samplingRate, 1) );
 
 	m_pRenderer.m_pRenderer->rebuild(*m_pRenderer.m_pRendererContext);
 
 	return true;
 }
 
-bool TrackRenderer::push(const OpenViBE::CMatrix& chunk)
+bool TrackRenderer::push(const OpenViBE::CStimulationSet& stimSet)
 {
+	uint64_t startTime = (m_FirstChunkTime!=(uint64_t)(-1) ? m_FirstChunkTime : 0);
 
-	/*
-	if(chunk.getDimensionCount() == 2 && 
-		(chunk.getDimensionSize(0) != m_pRenderer.m_pRenderer->getChannelCount() 
-		   || m_pRenderer.m_pRenderer->getSampleCount() % chunk.getDimensionSize(1) !=0))
+	for(uint32_t j=0;j<stimSet.getStimulationCount();j++)
 	{
+		/*
+		std::cout << "Start " << OpenViBE::ITimeArithmetics::timeToSeconds(startTime) 
+			<< " StimDate " << OpenViBE::ITimeArithmetics::timeToSeconds(stimSet.getStimulationDate(j)) 
+			<< " transl "<< OpenViBE::ITimeArithmetics::timeToSeconds(stimSet.getStimulationDate(j) - startTime)
+			<< "\n";
+			*/
 
+		m_pRenderer.m_pRenderer->feed(stimSet.getStimulationDate(j) - startTime, stimSet.getStimulationIdentifier(j));
 	}
-	*/
+	return true;
+}
+
+bool TrackRenderer::push(const OpenViBE::CMatrix& chunk, uint64_t startTime)
+{
+	if(m_FirstChunkTime==(uint64_t)-1)
+	{
+		m_FirstChunkTime = startTime;
+	}
 
 	// @todo refactor to separate 64bit->32bit float conversion routine; use fixed memory buffer
 	uint64_t numFloats = chunk.getBufferElementCount();
@@ -144,7 +173,6 @@ bool TrackRenderer::push(const OpenViBE::CMatrix& chunk)
 	}
 
 	m_pRenderer.m_pRenderer->feed(floatBuf, chunk.getDimensionSize(1));
-
 	delete[] floatBuf;
 
 	return true;
@@ -195,6 +223,7 @@ bool TrackRenderer::draw(void)
 	TrackRenderer::preDraw();
 
 	::glPushAttrib(GL_ALL_ATTRIB_BITS);
+	//::glClearColor(1.0,1.0,1.0,1.0);
 	::glColor4f(m_oColor.r, m_oColor.g, m_oColor.b, m_pRenderer.m_pRendererContext->getTranslucency());
 	m_pRenderer.m_pRenderer->render(*m_pRenderer.m_pRendererContext);
 	::glPopAttrib();

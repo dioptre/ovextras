@@ -24,6 +24,7 @@
 #include "TrackRenderer.h"
 
 #include "TypeSignal.h"
+#include "TypeStimulation.h"
 #include "Stream.h"
 
 #include <system/ovCMath.h>
@@ -103,7 +104,8 @@ bool GUI::initGUI(int argc, char *argv[])
 
 	g_idle_add(fIdleApplicationLoop, this);
 
-	::GtkWidget* l_pTrackWindow=GTK_WIDGET(gtk_builder_get_object(m_pInterface, "tracker-scenario_drawing_area"));
+	// ::GtkWidget* l_pTrackWindow=GTK_WIDGET(gtk_builder_get_object(m_pInterface, "tracker-scenario_drawing_area"));
+	::GtkWidget* l_pTrackWindow=GTK_WIDGET(gtk_builder_get_object(m_pInterface, "table1"));
 
 	//@todo refactor the whole thing that follows, here just to test the renderer
 	m_Renderer = new TrackRenderer();
@@ -271,13 +273,17 @@ bool GUI::redrawTrack(void)
 
 	const Track& tr = m_rTracker.getWorkspace().getTrack();
 	const Stream<TypeSignal>* ptr = nullptr;
+	const Stream<TypeStimulation>* stimPtr = nullptr;
 
 	for(size_t i=0;i<tr.getNumStreams();i++)
 	{
 		if(tr.getStream(i) && tr.getStream(i)->getTypeIdentifier()==OV_TypeId_Signal)
 		{
 			ptr = reinterpret_cast< const Stream<TypeSignal>* >(tr.getStream(i));
-			break;
+		}
+		if(tr.getStream(i) && tr.getStream(i)->getTypeIdentifier()==OV_TypeId_Stimulations)
+		{
+			stimPtr = reinterpret_cast< const Stream<TypeStimulation>* >(tr.getStream(i));
 		}
 	}
 	if(ptr)
@@ -287,16 +293,56 @@ bool GUI::redrawTrack(void)
 		const uint32_t lastChunk = std::min<uint32_t>(firstChunk+chunksPerView, m_totalChunks);
 		const uint32_t chunksInRange = lastChunk-firstChunk;
 
-		m_Renderer->reset(m_numChannels, chunksInRange*m_chunkSize);
+		m_Renderer->reset(m_numChannels, chunksInRange*m_chunkSize, ptr->getHeader().m_samplingFrequency);
 
-		// Push all chunks to renderer
+		uint64_t firstChunkStart = 0;
+		uint64_t lastChunkEnd = 0;
+
+		// Find the timestamps of first and last chunks @todo move to Stream?
+		TypeSignal::Buffer* buf = nullptr;
+		if(ptr->getChunk(firstChunk, &buf))
+		{
+			firstChunkStart = buf->m_bufferStart;
+		}
+		if(ptr->getChunk(lastChunk, &buf))
+		{
+			lastChunkEnd = buf->m_bufferEnd;
+		}
+
+		// Push the visible chunks to renderer
 		for(uint32_t i=firstChunk;i<lastChunk;i++)
 		{
-			TypeSignal::Buffer* buf;
+			if(ptr->getChunk(i, &buf))
+			{
+				m_Renderer->push(buf->m_buffer, buf->m_bufferStart);
+			}
+		}
 
-			ptr->getChunk(i, &buf);
+		/*
+			std::cout << "ChunkRange Start " << OpenViBE::ITimeArithmetics::timeToSeconds(firstChunkStart) 
+				<< " End " << OpenViBE::ITimeArithmetics::timeToSeconds(lastChunkEnd) 
+				<< "\n";
+		*/
 
-			m_Renderer->push(buf->m_buffer);
+		// Push all stimulations to the renderer that are in the range
+		// since we cannot guarantee the chunk granularity, loop all. @todo make more efficient
+		uint32_t i=0;
+		TypeStimulation::Buffer *stimBuf = nullptr;
+		while(stimPtr->getChunk(i, &stimBuf))
+		{
+			/*
+			std::cout << "Start " << OpenViBE::ITimeArithmetics::timeToSeconds(stimBuf->m_bufferStart) 
+				<< " End " << OpenViBE::ITimeArithmetics::timeToSeconds(stimBuf->m_bufferEnd) 
+				<< "\n";
+				*/
+
+			if(stimBuf->m_bufferStart >= firstChunkStart && stimBuf->m_bufferEnd <= lastChunkEnd && stimBuf->m_buffer.getStimulationCount()>0)
+			{
+
+
+				m_Renderer->push(stimBuf->m_buffer);
+			}
+			i++;
 		}
 	}
 

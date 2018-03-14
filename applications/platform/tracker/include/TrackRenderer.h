@@ -50,8 +50,9 @@ public:
 	bool redraw(bool bImmediate=false);
 	bool reshape(uint32_t width, uint32_t height);
 
-	bool reset(uint32_t totalChannelCount, uint32_t totalSampleCount);
-	bool push(const OpenViBE::CMatrix& chunk);
+	bool reset(uint32_t totalChannelCount, uint32_t totalSampleCount, uint32_t samplingRate);
+	bool push(const OpenViBE::CStimulationSet& stimSet);
+	bool push(const OpenViBE::CMatrix& chunk, uint64_t startTime);
 
 	Renderer m_pRenderer;
 
@@ -80,6 +81,8 @@ protected:
 	} TColor;
 
 	TColor m_oColor;
+
+	uint64_t m_FirstChunkTime = (uint64_t)(-1);
 
 	Mensia::AdvancedVisualization::TGtkGLWidget < TrackRenderer > m_oGtkGLWidget;
 };

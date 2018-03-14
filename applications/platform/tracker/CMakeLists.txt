@@ -20,7 +20,13 @@ LIST(APPEND source_files ${OV_AVP_PATH}/m_defines.hpp
   ${OV_AVP_PATH}/m_GtkGL.hpp
   ${OV_AVP_PATH}/m_VisualizationTools.cpp
   ${OV_AVP_PATH}/m_VisualizationTools.hpp
-  ${OV_AVP_PATH}/mTGtkGLWidget.hpp)
+  ${OV_AVP_PATH}/mTGtkGLWidget.hpp
+  ${OV_AVP_PATH}/mIRuler.hpp
+)
+FILE(GLOB RULER_FILES RELATIVE ${OV_AVP_PATH}/ruler/ *.hpp)
+MESSAGE(STATUS "FOUND ${RULER_FILES} in ${OV_AVP_PATH}")
+# AUX_SOURCE_DIRECTORY(${OV_AVP_PATH}/ruler RULER_FILES)
+LIST(APPEND source_files ${RULER_FILES})
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${source_files})
 INCLUDE_DIRECTORIES("include")
@@ -33,6 +39,7 @@ INCLUDE("FindOpenViBEModuleEBML")
 INCLUDE("FindOpenViBEModuleSocket")
 INCLUDE("FindOpenViBEModuleSystem")
 INCLUDE("FindOpenViBEModuleFS")
+INCLUDE("FindOpenViBEModuleMessaging")
 INCLUDE("FindThirdPartyGTK")
 INCLUDE("FindThirdPartyBoost_System")
 INCLUDE("FindThirdPartyOpenGL")

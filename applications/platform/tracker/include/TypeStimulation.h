@@ -18,6 +18,9 @@ public:
 	class Buffer : public TypeBase::Buffer
 	{
 	public:
+
+		virtual bool getEBML(EBML::IWriterHelper& target) const override;
+
 		// Payload
 		OpenViBE::CStimulationSet m_buffer;
 

@@ -23,7 +23,11 @@ bool Tracker::play(bool playFast)
 	{
 	case State_Stopped:
 			m_Workspace.rewind();
-			m_Workspace.play(playFast);
+			if(!m_Workspace.play(playFast))
+			{
+				std::cout << "Error: play failed\n";
+				return false;
+			}
 			m_CurrentState = State_Playing;
 			break;
 	case State_Playing:

@@ -13,6 +13,8 @@ public:
 	class Header : public TypeMatrix::Header
 	{
 	public:
+		virtual bool getEBML(EBML::IWriterHelper& target) const override;
+
 		// Header
 		uint64_t m_samplingFrequency = 0;
 	};
@@ -20,8 +22,8 @@ public:
 	class Buffer : public TypeMatrix::Buffer
 	{
 
-
 	};
+
 
 	// Prevent constructing
 	TypeSignal()=delete;

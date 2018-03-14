@@ -33,6 +33,12 @@ public:
 	virtual size_t getChunkCount(void) const = 0;
 //	virtual bool getChunk(size_t idx, TypeBase::Buffer **ptr) const = 0;
 
+	virtual bool initializeEBMLExport(void) =0;
+	virtual bool getEBMLHeader(std::vector<uint8_t>& data) = 0;
+	virtual bool getEBMLChunk(std::vector<uint8_t>& data, uint64_t& start, uint64_t& end) = 0;
+	virtual bool getEBMLChunk(int idx, std::vector<uint8_t>& data, uint64_t& start, uint64_t& end) = 0;
+	virtual bool getEBMLEnd(std::vector<uint8_t>& data, uint64_t& start, uint64_t& end) = 0;
+
 protected:
 
 	size_t m_position = 0;

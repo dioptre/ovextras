@@ -15,6 +15,8 @@
 
 #include "DecoderBase.h"
 
+// @todo might refactor this to 'streambundle'
+
 class Track {
 public:
 
@@ -31,6 +33,7 @@ public:
 
 	// Basically an iterator; should only return part covered by m_vSelection; @todo may need re-epoching
 	bool getNextStream(StreamBase** output);
+	bool getNextStreamIndex(int& index) const;
 
 	uint64_t getNumStreams(void) const { return m_Streams.size(); };
 	const StreamBase* getStream(uint64_t idx) const;
@@ -38,6 +41,8 @@ public:
 //	bool getNextChunk(uint64_t idx, const StreamChunk** output);
 
 	uint64_t getSamplingRate(void) const;
+
+	std::vector<StreamBase*>& getAllStreams(void) { return m_Streams; };
 
 protected:
 

@@ -267,8 +267,11 @@ public:
 
 void playerLaunch(const char *xmlFile, bool playFast)
 {
-	std::string Designer = std::string(OpenViBE::Directories::getBinDir().toASCIIString()) + "/openvibe-designer --no-session-management --no-gui " 
-		+ (playFast ? "--play-fast " : "--play ");
+	const bool doDebug = false;
+	std::string Designer = std::string(OpenViBE::Directories::getBinDir().toASCIIString()) + "/openvibe-designer --no-session-management"
+		+ (doDebug ? "" : " --no-gui")
+		+ (playFast ? " --play-fast" : " --play")
+		+ " ";
 	std::string OutputDump = std::string(OpenViBE::Directories::getDistRootDir().toASCIIString()) + "/tracker-dump.txt";
 
 	auto cmd = Designer + std::string(xmlFile) + " >" + OutputDump;
