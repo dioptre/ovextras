@@ -1003,6 +1003,7 @@ OpenViBE::boolean CDriverBrainProductsLiveAmp::configureImpedanceMessure()
 OpenViBE::uint32 CDriverBrainProductsLiveAmp::getLiveAmpSampleSize(void)
 {
 	int32 l_i32Channels, l_i32DataType;
+	float32	l_f32Resolution;
 	int32 l_i32ByteSize = 0;
 
 	m_vDataTypeArray.clear();
@@ -1018,8 +1019,9 @@ OpenViBE::uint32 CDriverBrainProductsLiveAmp::getLiveAmpSampleSize(void)
 		{
 			// get the type of channel
 			l_i32Res = ampGetProperty(m_pHandle, PG_CHANNEL, c, CPROP_I32_DataType, &l_i32DataType, sizeof(l_i32DataType));
-			
 			m_vDataTypeArray.push_back(l_i32DataType);
+			l_i32Res = ampGetProperty(m_pHandle, PG_CHANNEL, c, CPROP_F32_Resolution, &l_f32Resolution, sizeof(l_f32Resolution));			
+			m_vResolutionArray.push_back(l_f32Resolution);
 			m_ui32UsedChannelsCounter++;
 
 			switch (l_i32DataType)
@@ -1082,56 +1084,56 @@ void CDriverBrainProductsLiveAmp::liveAmpExtractData(OpenViBE::int32 samplesRead
 				case DT_INT16:
 					{
 						int16_t tmp = reinterpret_cast<int16_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample = static_cast<float32> (tmp);
+						l_f32Sample = static_cast<float32> (tmp) * m_vResolutionArray[i];
 						l_i32Offset += 2;
 						break;
 					}
 				case DT_UINT16:
 					{
 						uint16_t tmp = reinterpret_cast<uint16_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample  = static_cast<float32> (tmp);
+						l_f32Sample  = static_cast<float32> (tmp) * m_vResolutionArray[i];
 						l_i32Offset += 2;
 						break;
 					}					
 				case DT_INT32:
 					{
 						int32_t tmp = reinterpret_cast<int32_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample = static_cast<float32> (tmp);
+						l_f32Sample = static_cast<float32> (tmp) * m_vResolutionArray[i];
 						l_i32Offset += 4;
 						break;
 					}
 				case DT_UINT32:
 					{
 						uint32_t tmp = reinterpret_cast<uint32_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample  = static_cast<float32> (tmp);
+						l_f32Sample  = static_cast<float32> (tmp) * m_vResolutionArray[i];
 						l_i32Offset += 4;
 						break;
 					}
 				case DT_FLOAT32:
 					{
 						float32 tmp = reinterpret_cast<float32&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample = tmp;
+						l_f32Sample = tmp * m_vResolutionArray[i];
 						l_i32Offset += 4;
 						break;
 					}
 				case DT_INT64:
 					{
 						int64_t tmp = reinterpret_cast<int64_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample = static_cast<float32> (tmp);
+						l_f32Sample = static_cast<float32> (tmp) * m_vResolutionArray[i];
 						l_i32Offset += 8;
 						break;
 					}
 				case DT_UINT64:
 					{
 						uint64_t tmp = reinterpret_cast<uint64_t&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample = static_cast<float32> (tmp);
+						l_f32Sample = static_cast<float32> (tmp) * m_vResolutionArray[i];
 						l_i32Offset += 8;
 						break;
 					}
 				case DT_FLOAT64:
 					{
 						float64 tmp = reinterpret_cast<float64&> (m_pSampleBuffer[s*m_ui32SampleSize + l_i32Offset]);
-						l_f32Sample = static_cast<float32> (tmp);
+						l_f32Sample = static_cast<float32> (tmp) * m_vResolutionArray[i];
 						l_i32Offset += 8;
 						break;					
 					}					

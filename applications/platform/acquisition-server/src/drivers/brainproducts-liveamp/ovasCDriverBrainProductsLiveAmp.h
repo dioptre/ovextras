@@ -99,7 +99,8 @@ namespace OpenViBEAcquisitionServer
 		std::vector<OpenViBE::uint16> m_vTriggerIndices;
 		std::vector<OpenViBE::uint16> m_vLastTriggerStates;
 		std::vector<OpenViBE::uint16> m_vDataTypeArray;
-
+		std::vector<OpenViBE::float32> m_vResolutionArray;
+		
 		OpenViBE::boolean m_bSimulationMode;
 		/**
 		* \function initializeLiveAmp
