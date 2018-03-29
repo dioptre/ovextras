@@ -6,6 +6,12 @@
 #include <exception>
 #include <memory>
 
+#if defined TARGET_OS_Linux || defined TARGET_OS_MacOS
+#include <cstddef>
+#include <type_traits>
+#include <utility>
+#endif
+
 // OV includes
 #include <toolkit/ovtk_all.h>
 #include <openvibe/ovITimeArithmetics.h>
@@ -28,6 +34,39 @@ using namespace OpenViBEAcquisitionServer;
 using namespace OpenViBE;
 using namespace Kernel;
 namespace es = eemagine::sdk;
+
+#if defined TARGET_OS_Linux || defined TARGET_OS_MacOS
+namespace std {
+    template<class T> struct _Unique_if {
+        typedef unique_ptr<T> _Single_object;
+    };
+
+    template<class T> struct _Unique_if<T[]> {
+        typedef unique_ptr<T[]> _Unknown_bound;
+    };
+
+    template<class T, size_t N> struct _Unique_if<T[N]> {
+        typedef void _Known_bound;
+    };
+
+    template<class T, class... Args>
+        typename _Unique_if<T>::_Single_object
+        make_unique(Args&&... args) {
+            return unique_ptr<T>(new T(std::forward<Args>(args)...));
+        }
+
+    template<class T>
+        typename _Unique_if<T>::_Unknown_bound
+        make_unique(size_t n) {
+            typedef typename remove_extent<T>::type U;
+            return unique_ptr<T>(new U[n]());
+        }
+
+    template<class T, class... Args>
+        typename _Unique_if<T>::_Known_bound
+        make_unique(Args&&...) = delete;
+}
+#endif
 
 //___________________________________________________________________//
 //                                                                   //
@@ -90,26 +129,6 @@ boolean CDriverEEGO::initialize(
 		// server later...
 		m_pSample = std::make_unique<float32[]>(m_oHeader.getChannelCount() * ui32SampleCountPerSentBlock);
 		m_ui32SamplesInBuffer = 0;
-		if (!m_pSample)
-		{
-			throw std::exception();
-		}
-
-		// create the amplifier factory
-		// To initialize we need to locate the path of the DLL
-		// Create path to the dynamic library
-#ifdef _WIN32
-		const OpenViBE::CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
-		const std::string l_sPath(l_oLibDir.toASCIIString());
-		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath.c_str() << "\n";
-		es::factory fact(l_sPath);
-#else
-		es::factory fact("libeego-SDK.so");
-#endif // _WIN32
-
-		// to check what is going on case of error; Log version
-		const auto version = fact.getVersion();
-		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO RT: Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
 
 		// Get the amplifier. If none is connected an exception will be thrown
 		try
@@ -167,8 +186,8 @@ boolean CDriverEEGO::check_configuration(void)
 			GTK_DIALOG_MODAL, // Behavoir
 			GTK_MESSAGE_QUESTION, // Type
 			GTK_BUTTONS_OK_CANCEL, // buttons
-			"The channels masks are set to only stream %d channels, but %d channels should be streamed.\n"
-			"Change the amount of channels to %d?", l_iAllChannels, m_oHeader.getChannelCount(), l_iAllChannels);
+			"The channels masks are set to only stream %ld channels, but %d channels should be streamed.\n"
+			"Change the amount of channels to %ld?", l_iAllChannels, m_oHeader.getChannelCount(), l_iAllChannels);
 		gint l_iResult = gtk_dialog_run(GTK_DIALOG(l_pDialogue));
 		gtk_widget_destroy(l_pDialogue);
 		l_pDialogue = nullptr;
@@ -192,7 +211,7 @@ uint64 CDriverEEGO::getRefChannelMask() const
 	uint64 l_i64MaskEEG(0);
 	if (!CHeaderEEGO::convertMask(m_sEEGMask, l_i64MaskEEG))
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Warning << "Error converting mask: m_sEEGMask: " << m_sEEGMask;
+		m_rDriverContext.getLogManager() << LogLevel_Warning << "Error converting mask: m_sEEGMask: " << m_sEEGMask << "\n";
 	}
 	return l_i64MaskEEG;
 }
@@ -214,14 +233,19 @@ eemagine::sdk::factory& CDriverEEGO::factory()
 		// create the amplifier factory
 		// To initialize we need to locate the path of the DLL
 		// Create path to the dll
+#ifdef _WIN32
 		const CString l_oLibDir = Directories::getBinDir() + "\\eego-SDK.dll";
-		auto l_sPath = l_oLibDir.toASCIIString();
-		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll path: " << l_sPath << "\n";
+		const std::string l_sPath(l_oLibDir.toASCIIString());
+#else
+		const std::string l_sPath("libeego-SDK.so");
+#endif // _WIN32
+
+		m_rDriverContext.getLogManager() << LogLevel_Debug << "SDK dll/so path: " << l_sPath.c_str() << "\n";
 		m_pFactory = std::make_unique<es::factory>(l_sPath);
 
 		// to check what is going on case of error; Log version
 		const auto version = m_pFactory->getVersion();
-		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO RT: Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
+		m_rDriverContext.getLogManager() << LogLevel_Info << "EEGO SDK Version: " << version.major << "." << version.minor << "." << version.micro << "." << version.build << "\n";
 	}
 
 	return *m_pFactory;
@@ -259,7 +283,7 @@ boolean CDriverEEGO::start(void)
 		// Error check
 		if (!m_pStream)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << "The stream returned is NULL!";
+			m_rDriverContext.getLogManager() << LogLevel_Error << "The stream returned is NULL!" << "\n";
 			return false;
 		}
 
@@ -287,7 +311,7 @@ boolean CDriverEEGO::start(void)
 	}
 	catch (const std::exception& ex)
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not open EEG stream: " << ex.what();
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Could not open EEG stream: " << ex.what() << "\n";
 		return false;
 	}
 
@@ -295,6 +319,26 @@ boolean CDriverEEGO::start(void)
 }
 
 boolean CDriverEEGO::loop(void)
+{
+	boolean result = false;
+
+	try
+	{
+		result = loop_wrapped();
+	}
+	catch (const std::exception& ex)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Error in data update: " << ex.what() << "\n";
+	}
+	catch (...)
+	{
+		m_rDriverContext.getLogManager() << LogLevel_Error << "Unknown error in data update." << "\n";
+	}
+
+	return result;
+}
+
+OpenViBE::boolean CDriverEEGO::loop_wrapped()
 {
 	if (!m_rDriverContext.isConnected()) return false;
 
@@ -308,7 +352,7 @@ boolean CDriverEEGO::loop(void)
 	if (m_pStream->getChannelList().size() < m_oHeader.getChannelCount()
 		&& m_rDriverContext.isStarted()) // !started -> impedance
 	{
-		m_rDriverContext.getLogManager() << LogLevel_Error << "The amplifier got asked for more channels than it could provide";
+		m_rDriverContext.getLogManager() << LogLevel_Error << "The amplifier got asked for more channels than it could provide" << "\n";
 		return false;
 	}
 
@@ -322,7 +366,7 @@ boolean CDriverEEGO::loop(void)
 		}
 		catch (const std::exception& ex)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what();
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what() << "\n";
 			return false;
 		}
 
@@ -388,7 +432,7 @@ boolean CDriverEEGO::loop(void)
 		}
 		catch (const std::exception& ex)
 		{
-			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what();
+			m_rDriverContext.getLogManager() << LogLevel_Error << "Error fetching data: " << ex.what() << "\n";
 			return false;
 		}
 
