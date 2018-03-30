@@ -7,7 +7,7 @@
 // @END CICIT-GARCHES
 
 // @BEGIN GIPSA
-#include "box-algorithms/ovpCBoxAlgorithmBrainampFileWriter.h"
+#include "box-algorithms/ovpCBoxAlgorithmBrainampFileWriterGipsa.h"
 // @END GIPSA
 
 OVP_Declare_Begin();
@@ -23,7 +23,7 @@ OVP_Declare_Begin();
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_BinaryFormat, "UINT_16",           OVP_TypeId_BinaryFormat_uint16.toUInteger());
 	rPluginModuleContext.getTypeManager().registerEnumerationEntry(OVP_TypeId_BinaryFormat, "IEEE_FLOAT_32",     OVP_TypeId_BinaryFormat_float32.toUInteger());
 
-	OVP_Declare_New(OpenViBEPlugins::FileIO::CBoxAlgorithmBrainampFileWriterDesc)
+	OVP_Declare_New(OpenViBEPlugins::FileIO::CBoxAlgorithmBrainampFileWriterGipsaDesc)
 // @END GIPSA
 
 OVP_Declare_End();
