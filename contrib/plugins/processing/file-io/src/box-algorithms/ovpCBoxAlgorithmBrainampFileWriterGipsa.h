@@ -21,8 +21,8 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsa     OpenViBE::CIdentifier(0x056FFEA6, 0x4EAAC589)
-#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsaDesc OpenViBE::CIdentifier(0x4656AFDC, 0x38662FFD)
+#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsa     OpenViBE::CIdentifier(0x0C7E0BDE, 0x4EC90F95)
+#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsaDesc OpenViBE::CIdentifier(0x0A77142C, 0x316B6E47)
 
 namespace OpenViBEPlugins
 {
