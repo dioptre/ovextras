@@ -64,10 +64,7 @@ namespace OpenViBEPlugins
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Writes its input into a BrainVision format file"); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("This box allows to write the input signal under BrainVision file format."); }
 			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing/BrainVision Format"); }
-			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
-			virtual OpenViBE::CString getSoftwareComponent(void) const   { return OpenViBE::CString("neurort"); }
-			virtual OpenViBE::CString getAddedSoftwareVersion(void) const   { return OpenViBE::CString("0.0.0"); }
-			virtual OpenViBE::CString getUpdatedSoftwareVersion(void) const { return OpenViBE::CString("3.1.0"); }
+			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }			
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-save"); }
 
 			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_BrainampFileWriter; }
