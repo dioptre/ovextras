@@ -28,6 +28,7 @@
 #define OVP_Algorithm_BrainampFileReader_InputParameterId_EpochDuration        OpenViBE::CIdentifier(0x002AEE72, 0x288D489E)
 #define OVP_Algorithm_BrainampFileReader_InputParameterId_SeekTime             OpenViBE::CIdentifier(0x00627156, 0x55790CAE)
 #define OVP_Algorithm_BrainampFileReader_InputParameterId_ConvertStimuli       OpenViBE::CIdentifier(0x537445DC, 0x6C792A96)
+#define OVP_Algorithm_BrainampFileReader_InputParameterId_MarkerDictionaryFilename     OpenViBE::CIdentifier(0x1F044ABB, 0x5AACf062)
 
 #define OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentStartTime    OpenViBE::CIdentifier(0x003CE019, 0x3DADE050)
 #define OVP_Algorithm_BrainampFileReader_OutputParameterId_CurrentEndTime      OpenViBE::CIdentifier(0x3B87DE16, 0xB8EFB2FB)
@@ -42,6 +43,11 @@
 
 #define OVP_Algorithm_BrainampFileReader_OutputTriggerId_Error                 OpenViBE::CIdentifier(0x00B1E3DF, 0x3ABC6C5A)
 #define OVP_Algorithm_BrainampFileReader_OutputTriggerId_DataProduced          OpenViBE::CIdentifier(0x00E7D5F9, 0x1471AFF2)
+
+//-------------------------------------------------------------------//
+// Brainamp File Writer
+#define OVP_ClassId_BoxAlgorithm_BrainampFileWriter                            OpenViBE::CIdentifier(0xABACC29F, 0xD5A0E5A8)
+#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterDesc                        OpenViBE::CIdentifier(0x6347C864, 0x8483E2DF)
 
 //-------------------------------------------------------------------//
 

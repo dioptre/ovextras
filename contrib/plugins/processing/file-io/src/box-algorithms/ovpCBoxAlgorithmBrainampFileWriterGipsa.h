@@ -8,8 +8,8 @@
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * You should have received a copy of the GNU General Public License along with Brain Invaders. If not, see http://www.gnu.org/licenses/.*/
  
-#ifndef __OpenViBEPlugins_BoxAlgorithm_BrainampFileWriter_H__
-#define __OpenViBEPlugins_BoxAlgorithm_BrainampFileWriter_H__
+#ifndef __OpenViBEPlugins_BoxAlgorithm_BrainampFileWriterGipsa_H__
+#define __OpenViBEPlugins_BoxAlgorithm_BrainampFileWriterGipsa_H__
 
 #include "../ovp_defines.h"
 #include <openvibe/ov_all.h>
@@ -21,18 +21,18 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#define OVP_ClassId_BoxAlgorithm_BrainampFileWriter     OpenViBE::CIdentifier(0x0C7E0BDE, 0x4EC90F95)
-#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterDesc OpenViBE::CIdentifier(0x0A77142C, 0x316B6E47)
+#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsa     OpenViBE::CIdentifier(0x0C7E0BDE, 0x4EC90F95)
+#define OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsaDesc OpenViBE::CIdentifier(0x0A77142C, 0x316B6E47)
 
 namespace OpenViBEPlugins
 {
 	namespace FileIO
 	{
-		class CBoxAlgorithmBrainampFileWriter : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
+		class CBoxAlgorithmBrainampFileWriterGipsa : public OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >
 		{
 		public:
 
-			CBoxAlgorithmBrainampFileWriter(void);
+			CBoxAlgorithmBrainampFileWriterGipsa(void);
 			virtual void release(void) { delete this; }
 
 			virtual OpenViBE::boolean initialize(void);
@@ -71,7 +71,7 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_BrainampFileWriter);
+			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxAlgorithm < OpenViBE::Plugins::IBoxAlgorithm >, OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsa);
 	
 		protected:
 
@@ -83,12 +83,12 @@ namespace OpenViBEPlugins
 			};
 
 			//input signal 1
-			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmBrainampFileWriter > * m_pStreamDecoder;
+			OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmBrainampFileWriterGipsa > * m_pStreamDecoder;
 			OpenViBE::IMatrix* m_pMatrix;
 			OpenViBE::uint64 m_ui64SamplingFrequency;
 			
 			//input stimulation 1 
-			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmBrainampFileWriter > * m_pStimulationDecoderTrigger;
+			OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmBrainampFileWriterGipsa > * m_pStimulationDecoderTrigger;
 			//OpenViBE::Kernel::TParameterHandler <const OpenViBE::IMemoryBuffer* > ip_pMemoryBufferToDecodeTrigger;
 			//OpenViBE::Kernel::TParameterHandler < OpenViBE::IStimulationSet* > op_pStimulationSetTrigger;
 
@@ -107,7 +107,7 @@ namespace OpenViBEPlugins
 			OpenViBE::boolean m_bIsVmrkHeaderFileWritten; //Is the beginning of the .vmrk (file with stimulations is written)
 		};
 
-		class CBoxAlgorithmBrainampFileWriterListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
+		class CBoxAlgorithmBrainampFileWriterGipsaListener : public OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >
 		{
 		public:
 
@@ -119,24 +119,24 @@ namespace OpenViBEPlugins
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
 
-		class CBoxAlgorithmBrainampFileWriterDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
+		class CBoxAlgorithmBrainampFileWriterGipsaDesc : public OpenViBE::Plugins::IBoxAlgorithmDesc
 		{
 		public:
 
 			virtual void release(void) { }
 
-			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("Brainamp file writer"); }
+			virtual OpenViBE::CString getName(void) const                { return OpenViBE::CString("BrainVision Format file writer (Gipsa)"); }
 			virtual OpenViBE::CString getAuthorName(void) const          { return OpenViBE::CString("Anton Andreev"); }
 			virtual OpenViBE::CString getAuthorCompanyName(void) const   { return OpenViBE::CString("Gipsa-lab"); }
 			virtual OpenViBE::CString getShortDescription(void) const    { return OpenViBE::CString("Writes signal in the Brainamp file format."); }
 			virtual OpenViBE::CString getDetailedDescription(void) const { return OpenViBE::CString("You must select the location of the output header file .vhdr. The .eeg and .vmrk files will be created with the same name and in the same folder. Integer codes of OpenVibe stimulations are saved in the .vmrk file. OV Stimulation with code 233 will be saved as S233 on the .vmrk file."); }
-			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing/Brainamp"); }
+			virtual OpenViBE::CString getCategory(void) const            { return OpenViBE::CString("File reading and writing/BrainVision Format"); }
 			virtual OpenViBE::CString getVersion(void) const             { return OpenViBE::CString("1.1"); }
 			virtual OpenViBE::CString getStockItemName(void) const       { return OpenViBE::CString("gtk-save"); }
 
-			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_BrainampFileWriter; }
-			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::FileIO::CBoxAlgorithmBrainampFileWriter; }
-			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmBrainampFileWriterListener; }
+			virtual OpenViBE::CIdentifier getCreatedClass(void) const    { return OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsa; }
+			virtual OpenViBE::Plugins::IPluginObject* create(void)       { return new OpenViBEPlugins::FileIO::CBoxAlgorithmBrainampFileWriterGipsa; }
+			virtual OpenViBE::Plugins::IBoxListener* createBoxListener(void) const               { return new CBoxAlgorithmBrainampFileWriterGipsaListener; }
 			virtual void releaseBoxListener(OpenViBE::Plugins::IBoxListener* pBoxListener) const { delete pBoxListener; }
 
 			virtual OpenViBE::boolean getBoxPrototype(
@@ -151,9 +151,9 @@ namespace OpenViBEPlugins
 				return true;
 			}
 
-			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_BrainampFileWriterDesc);
+			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_BrainampFileWriterGipsaDesc);
 		};
 	};
 };
 
-#endif // __OpenViBEPlugins_BoxAlgorithm_BrainampFileWriter_H__
+#endif // __OpenViBEPlugins_BoxAlgorithm_BrainampFileWriterGipsa_H__

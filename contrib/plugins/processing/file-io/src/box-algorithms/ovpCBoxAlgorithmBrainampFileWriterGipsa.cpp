@@ -9,7 +9,7 @@
  * You should have received a copy of the GNU General Public License along with Brain Invaders. If not, see http://www.gnu.org/licenses/.
  */
  
-#include "ovpCBoxAlgorithmBrainampFileWriter.h"
+#include "ovpCBoxAlgorithmBrainampFileWriterGipsa.h"
 
 #include <string>
 #include <iostream>
@@ -26,7 +26,7 @@ using namespace OpenViBEPlugins::FileIO;
 
 //documentation Appendix B EEG file format: http://tsgdoc.socsci.ru.nl/images/d/d1/BrainVision_Recorder_UM.pdf
 
-CBoxAlgorithmBrainampFileWriter::CBoxAlgorithmBrainampFileWriter(void)
+CBoxAlgorithmBrainampFileWriterGipsa::CBoxAlgorithmBrainampFileWriterGipsa(void)
 	:
 	m_pStreamDecoder(NULL)
 	,m_pMatrix(NULL)
@@ -35,17 +35,17 @@ CBoxAlgorithmBrainampFileWriter::CBoxAlgorithmBrainampFileWriter(void)
 {
 }
 
-boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
+boolean CBoxAlgorithmBrainampFileWriterGipsa::initialize(void)
 {
 	// const IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 
 	m_bIsVmrkHeaderFileWritten = false;
 
 	//init input signal 1
-	m_pStreamDecoder=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmBrainampFileWriter >(*this,0);
+	m_pStreamDecoder=new OpenViBEToolkit::TSignalDecoder < CBoxAlgorithmBrainampFileWriterGipsa >(*this,0);
 
 	//init input stimulation 1 
-	m_pStimulationDecoderTrigger=new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmBrainampFileWriter >(*this,1);
+	m_pStimulationDecoderTrigger=new OpenViBEToolkit::TStimulationDecoder < CBoxAlgorithmBrainampFileWriterGipsa >(*this,1);
 
 	//Get parameters:
 	CString l_sFilename=FSettingValueAutoCast(*this->getBoxAlgorithmContext(), 0);
@@ -104,7 +104,7 @@ boolean CBoxAlgorithmBrainampFileWriter::initialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmBrainampFileWriter::uninitialize(void)
+boolean CBoxAlgorithmBrainampFileWriterGipsa::uninitialize(void)
 {
 	if(m_pStreamDecoder)
 	{
@@ -132,13 +132,13 @@ boolean CBoxAlgorithmBrainampFileWriter::uninitialize(void)
 	return true;
 }
 
-boolean CBoxAlgorithmBrainampFileWriter::processInput(uint32 ui32InputIndex)
+boolean CBoxAlgorithmBrainampFileWriterGipsa::processInput(uint32 ui32InputIndex)
 {
 	getBoxAlgorithmContext()->markAlgorithmAsReadyToProcess();
 	return true;
 }
 
-boolean CBoxAlgorithmBrainampFileWriter::process(void)
+boolean CBoxAlgorithmBrainampFileWriterGipsa::process(void)
 {
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -247,7 +247,7 @@ boolean CBoxAlgorithmBrainampFileWriter::process(void)
 	return true;
 }
 
-OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
+OpenViBE::boolean CBoxAlgorithmBrainampFileWriterGipsa::writeHeaderFile()
 {
 	// IBox& l_rStaticBoxContext=this->getStaticBoxContext();
 	// IBoxIO& l_rDynamicBoxContext=this->getDynamicBoxContext();
@@ -314,13 +314,13 @@ OpenViBE::boolean CBoxAlgorithmBrainampFileWriter::writeHeaderFile()
 		<< "============================" << std::endl
 		<< "Number of channels: " << l_uint32ChannelCount << std::endl 
 		<< "Sampling Rate [Hz]: " << (uint64)m_ui64SamplingFrequency << std::endl 
-		<< "Interval [µS]: " << std::fixed << std::setprecision(5) << l_f64Sampling_Interval << std::endl
+		<< "Interval [ÂµS]: " << std::fixed << std::setprecision(5) << l_f64Sampling_Interval << std::endl
 		<< std::endl;
 	
 		return true;
 }
 
-std::string CBoxAlgorithmBrainampFileWriter::getShortName(std::string fullpath)
+std::string CBoxAlgorithmBrainampFileWriterGipsa::getShortName(std::string fullpath)
 {
 	uint32 pos = fullpath.find_last_of("\\");
 	if (pos == std::string::npos) pos = fullpath.find_last_of("/");
@@ -335,7 +335,7 @@ std::string CBoxAlgorithmBrainampFileWriter::getShortName(std::string fullpath)
 	}
 }
 
-std::string CBoxAlgorithmBrainampFileWriter::FormatTime(boost::posix_time::ptime now)
+std::string CBoxAlgorithmBrainampFileWriterGipsa::FormatTime(boost::posix_time::ptime now)
 {
   using namespace boost::posix_time;
 
