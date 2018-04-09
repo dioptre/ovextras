@@ -930,7 +930,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Designer_DefaultWorkingDirectory}/signals/spaceship-freetime.gdf</Value>
+					<Value>${Path_Data}/scenarios/signals/spaceship-freetime.gdf</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>

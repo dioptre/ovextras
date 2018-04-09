@@ -30,7 +30,7 @@
 					<TypeIdentifier>(0x330306dd, 0x74a95f98)</TypeIdentifier>
 					<Name>Filename</Name>
 					<DefaultValue></DefaultValue>
-					<Value>${Designer_DefaultWorkingDirectory}/signals/bci-p300-magic-card.ov</Value>
+					<Value>${Path_Data}/scenarios/signals/bci-p300-magic-card.ov</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
