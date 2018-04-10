@@ -12,8 +12,8 @@ PROJECT(OpenViBE)
 # These versions are used by the subprojects by default.
 # If you wish to maintain specific version numbers for a subproject, please do so in the projects CMakeLists.txt
 SET(OV_GLOBAL_VERSION_MAJOR 2)
-SET(OV_GLOBAL_VERSION_MINOR 0)
-SET(OV_GLOBAL_VERSION_PATCH 1)
+SET(OV_GLOBAL_VERSION_MINOR 1)
+SET(OV_GLOBAL_VERSION_PATCH 0)
 SET(OV_GLOBAL_VERSION_STRING "${OV_GLOBAL_VERSION_MAJOR}.${OV_GLOBAL_VERSION_MINOR}.${OV_GLOBAL_VERSION_PATCH}")
 
 SET(DOCUMENTATION_TEMP_DIRECTORY "${CMAKE_INSTALL_PREFIX}/doc-tmp")

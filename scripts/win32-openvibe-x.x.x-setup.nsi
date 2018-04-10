@@ -3,8 +3,8 @@
 	!define DEPENDENCIES_DIR "..\..\dependencies"
 !endif
 
-	!define OV_VERSION "2.0.1"
-	!define OV_VERSION_SHORT "201"
+	!define OV_VERSION "2.1.0"
+	!define OV_VERSION_SHORT "210"
 	
 !ifndef OUTFILE
 	!define OUTFILE "openvibe-${OV_VERSION}-setup.exe"
