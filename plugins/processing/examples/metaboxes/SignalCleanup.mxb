@@ -1,27 +1,31 @@
 <OpenViBE-Scenario>
-	<FormatVersion>1</FormatVersion>
-	<Creator>Designer</Creator>
-	<CreatorVersion>2.0.0</CreatorVersion>
+	<FormatVersion>2</FormatVersion>
+	<Creator>OpenViBE Designer</Creator>
+	<CreatorVersion>2.1.0</CreatorVersion>
 	<Settings>
 		<Setting>
+			<Identifier>(0x723cc5dc, 0xd72a7577)</Identifier>
 			<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
 			<Name>LowCutFrequency</Name>
 			<DefaultValue>1</DefaultValue>
 			<Value>1</Value>
 		</Setting>
 		<Setting>
+			<Identifier>(0xbf54d1a1, 0x0c166380)</Identifier>
 			<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
 			<Name>HighCutFrequency</Name>
 			<DefaultValue>100</DefaultValue>
 			<Value>100</Value>
 		</Setting>
 		<Setting>
+			<Identifier>(0xda5a9fd6, 0x031776d3)</Identifier>
 			<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
 			<Name>NotchLowFrequency</Name>
 			<DefaultValue>48</DefaultValue>
 			<Value>48</Value>
 		</Setting>
 		<Setting>
+			<Identifier>(0xd54babd2, 0xf724c3df)</Identifier>
 			<TypeIdentifier>(0x007deef9, 0x2f3e95c6)</TypeIdentifier>
 			<Name>NotchHighFrequency</Name>
 			<DefaultValue>52</DefaultValue>
@@ -30,6 +34,7 @@
 	</Settings>
 	<Inputs>
 		<Input>
+			<Identifier>(0x69d00e6d, 0x100f7176)</Identifier>
 			<TypeIdentifier>(0x5ba36127, 0x195feae1)</TypeIdentifier>
 			<Name>Input Signal</Name>
 			<LinkedBoxIdentifier>(0x0d17e04a, 0x1c8eee27)</LinkedBoxIdentifier>
@@ -38,6 +43,7 @@
 	</Inputs>
 	<Outputs>
 		<Output>
+			<Identifier>(0x644ec1cc, 0x0a13512c)</Identifier>
 			<TypeIdentifier>(0x5ba36127, 0x195feae1)</TypeIdentifier>
 			<Name>Filtered Signal</Name>
 			<LinkedBoxIdentifier>(0x7ebeb131, 0x19f98c70)</LinkedBoxIdentifier>
