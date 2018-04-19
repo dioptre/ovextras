@@ -82,30 +82,8 @@ namespace OpenViBEPlugins
 				
 				char l_sName[1024];
 				::sprintf(l_sName, "Switch stim for output %i", ui32Index+1);
-				char l_sValue[128];
-				::sprintf(l_sValue, "OVTK_StimulationId_Label_%02i", ui32Index+1);
-				rBox.addSetting(l_sName, OV_TypeId_Stimulation,l_sValue,ui32Index+1,false);
+				rBox.addSetting(l_sName, OV_TypeId_Stimulation,"OVTK_StimulationId_Label_00");
 
-				return true;
-			};
-					
-			virtual OpenViBE::boolean onSettingAdded(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				// the output must have the same type as the input
-				OpenViBE::CIdentifier l_oIdentifier;
-				rBox.getInputType(1,l_oIdentifier);
-				rBox.addOutput("New output",l_oIdentifier,OV_UndefinedIdentifier,false);
-				
-				char l_sName[1024];
-				::sprintf(l_sName, "Switch stim for output %i", ui32Index);
-				//rBox.addSetting(l_sName, OV_TypeId_Stimulation,"OVTK_StimulationId_Label_00",ui32Index, false);
-				rBox.setSettingName(ui32Index, l_sName);
-				rBox.setSettingType(ui32Index, OV_TypeId_Stimulation);
-				char l_sValue[128];
-				::sprintf(l_sValue, "OVTK_StimulationId_Label_%02i", ui32Index);
-				rBox.setSettingDefaultValue(ui32Index, l_sValue);
-				
-				
 				return true;
 			};
 
@@ -122,13 +100,6 @@ namespace OpenViBEPlugins
 				}
 				return true;
 			}
-			
-			virtual OpenViBE::boolean onSettingRemoved(OpenViBE::Kernel::IBox& rBox, const OpenViBE::uint32 ui32Index)
-			{
-				rBox.removeOutput(ui32Index-1);		// -1 for the first setting which doesn't correspond to a stream				
-				return true;
-			}
-						
 			_IsDerivedFromClass_Final_(OpenViBEToolkit::TBoxListener < OpenViBE::Plugins::IBoxListener >, OV_UndefinedIdentifier);
 		};
 		
@@ -174,24 +145,18 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addOutput("Output",OV_TypeId_StreamedMatrix);
 				rBoxAlgorithmPrototype.addOutput("Output",OV_TypeId_StreamedMatrix);
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
+				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifyOutput);
 				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
 				
 				rBoxAlgorithmPrototype.addSetting("Default to output 1", OV_TypeId_Boolean, "false");
 				rBoxAlgorithmPrototype.addSetting("Switch stim for output 1",OV_TypeId_Stimulation,"OVTK_StimulationId_Label_00");
 				rBoxAlgorithmPrototype.addSetting("Switch stim for output 2",OV_TypeId_Stimulation,"OVTK_StimulationId_Label_01");
 
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
-				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
+				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanModifySetting);
+				//rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddSetting);
 				
 				//rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
-				
-				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_StreamedMatrix);
-				rBoxAlgorithmPrototype.addInputSupport(OV_TypeId_Signal);
-								
-				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_StreamedMatrix);
-				rBoxAlgorithmPrototype.addOutputSupport(OV_TypeId_Signal);
-				
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_ManualUpdate);
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_StreamedMatrixSwitchDesc);
