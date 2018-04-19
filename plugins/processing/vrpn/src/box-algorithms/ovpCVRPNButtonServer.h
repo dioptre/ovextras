@@ -120,7 +120,8 @@ namespace OpenViBEPlugins
 				rPrototype.addSetting("Button 1 ON",  OV_TypeId_Stimulation, "OVTK_GDF_Feedback_Continuous");
 				rPrototype.addSetting("Button 1 OFF", OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Trial");
 				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddInput);
-
+				
+				rPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_ManualUpdate);
 				return true;
 			}
 

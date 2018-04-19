@@ -169,6 +169,7 @@ namespace OpenViBEPlugins
 
 				rBoxAlgorithmPrototype.addFlag(OV_AttributeId_Box_FlagIsUnstable);
 
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_ManualUpdate);
 				return true;
 			}
 			_IsDerivedFromClass_Final_(OpenViBE::Plugins::IBoxAlgorithmDesc, OVP_ClassId_BoxAlgorithm_TCPWriterDesc);
