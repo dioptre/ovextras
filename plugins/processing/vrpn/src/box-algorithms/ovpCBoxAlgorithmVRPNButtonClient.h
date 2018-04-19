@@ -138,8 +138,8 @@ namespace OpenViBEPlugins
 				rBoxAlgorithmPrototype.addSetting("Peripheral name", OV_TypeId_String, "openvibe-vrpn@localhost");
 				rBoxAlgorithmPrototype.addSetting("Button 1 ON",     OV_TypeId_Stimulation, "OVTK_GDF_Feedback_Continuous");
 				rBoxAlgorithmPrototype.addSetting("Button 1 OFF",    OV_TypeId_Stimulation, "OVTK_GDF_End_Of_Trial");
-				rBoxAlgorithmPrototype.addFlag   (OpenViBE::Kernel::BoxFlag_CanAddOutput);
-
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_CanAddOutput);
+				rBoxAlgorithmPrototype.addFlag(OpenViBE::Kernel::BoxFlag_ManualUpdate);
 				return true;
 			}
 
