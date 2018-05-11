@@ -681,6 +681,11 @@ void CGDFFileReader::writeEvents()
 
 boolean CGDFFileReader::process()
 {
+    //  Stop the processing if we are at the end of the input stream.
+
+    if (m_oFile.eof())
+        return false;
+
 	//Don't do anything if an error as occurred while reading the input file
 	//for instance, if the file has channels with different sampling rates
 	if(m_bErrorOccurred)
